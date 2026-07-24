@@ -33,6 +33,7 @@ var colour=document.getElementById('colour');
 var keys={};
 var whiteMidis=[];
 var stream=null,ctx=null,analyser=null,data=null,raf=null,listening=false,last=null,stable=0,lastBar=0;
+var smoothLevel=0,armedUntil=0,quietFrames=0;
 function info(m){return{name:names[m%12],oct:Math.floor(m/12)-1};}
 for(var m=21;m<=108;m++){if(whites[info(m).name])whiteMidis.push(m);}
 whiteMidis.forEach(function(m){var e=document.createElement('div');var n=info(m);e.className='white';e.textContent=n.name==='C'?n.name+n.oct:n.name;e.dataset.m=m;keyboard.appendChild(e);keys[m]=e;});
@@ -41,10 +42,28 @@ setTimeout(function(){var c=keys[60];if(c)wrap.scrollLeft=Math.max(0,c.offsetLef
 colours.forEach(function(c){var b=document.createElement('button');b.type='button';b.className='swatch';b.style.background=c;b.addEventListener('click',function(){document.documentElement.style.setProperty('--glow',c);palette.classList.remove('open');});palette.appendChild(b);});
 colour.addEventListener('click',function(){palette.classList.toggle('open');});
 function midi(f){return Math.round(69+12*Math.log(f/440)/Math.log(2));}
-function pitch(buf,sr){var sumSquares=0;for(var i=0;i<buf.length;i++)sumSquares+=buf[i]*buf[i];var rms=Math.sqrt(sumSquares/buf.length);if(rms<0.01)return null;var min=Math.floor(sr/4200),max=Math.min(Math.floor(sr/27),Math.floor(buf.length/2)),best=-1,bestLag=0;for(var lag=min;lag<=max;lag++){var sum=0;for(var j=0;j<buf.length-lag;j++)sum+=buf[j]*buf[j+lag];if(sum>best){best=sum;bestLag=lag;}}return bestLag?{f:sr/bestLag,r:rms}:null;}
+function levelOf(buf){var s=0;for(var i=0;i<buf.length;i++)s+=buf[i]*buf[i];return Math.sqrt(s/buf.length);}
+function pitch(buf,sr,rms){if(rms<0.012)return null;var min=Math.floor(sr/4200),max=Math.min(Math.floor(sr/27),Math.floor(buf.length/2)),best=-1,bestLag=0,bestScore=0;for(var lag=min;lag<=max;lag++){var sum=0,a=0,b=0;for(var j=0;j<buf.length-lag;j++){var x=buf[j],y=buf[j+lag];sum+=x*y;a+=x*x;b+=y*y;}var score=sum/Math.sqrt(a*b+1e-12);if(score>bestScore){bestScore=score;best=sum;bestLag=lag;}}if(!bestLag||bestScore<0.72)return null;return{f:sr/bestLag,r:rms,q:bestScore};}
 function activate(m){Object.keys(keys).forEach(function(k){keys[k].classList.remove('active');});if(keys[m])keys[m].classList.add('active');}
 function makeBar(m,r){var k=keys[m];if(!k)return;var kr=k.getBoundingClientRect(),wr=wrap.getBoundingClientRect(),x=kr.left+kr.width/2-wr.left;var e=document.createElement('div');e.className='bar';e.textContent=info(m).name;e.style.left=(x-12)+'px';e.style.height=(52+Math.min(75,r*800))+'px';visual.appendChild(e);e.addEventListener('animationend',function(){if(e.parentNode)e.parentNode.removeChild(e);});}
-function loop(){if(!listening)return;analyser.getFloatTimeDomainData(data);var p=pitch(data,ctx.sampleRate);if(!p){last=null;stable=0;activate(-1);readout.textContent='Note: —';raf=requestAnimationFrame(loop);return;}var m=midi(p.f);if(m<21||m>108){raf=requestAnimationFrame(loop);return;}if(m===last)stable++;else{last=m;stable=1;}if(stable>=3){var n=info(m);activate(m);readout.textContent='Note: '+n.name+n.oct;var now=Date.now();if(now-lastBar>240){makeBar(m,p.r);lastBar=now;}}raf=requestAnimationFrame(loop);}
+function clearNote(){last=null;stable=0;activate(-1);readout.textContent='Note: —';}
+function loop(){
+ if(!listening)return;
+ analyser.getFloatTimeDomainData(data);
+ var rms=levelOf(data),previous=smoothLevel;
+ smoothLevel=smoothLevel*0.88+rms*0.12;
+ if(rms>0.018&&rms>Math.max(previous*1.55,previous+0.006)){armedUntil=Date.now()+1100;last=null;stable=0;}
+ if(rms<0.009)quietFrames++;else quietFrames=0;
+ if(quietFrames>7){clearNote();armedUntil=0;}
+ if(Date.now()>armedUntil){raf=requestAnimationFrame(loop);return;}
+ var p=pitch(data,ctx.sampleRate,rms);
+ if(!p){last=null;stable=0;raf=requestAnimationFrame(loop);return;}
+ var m=midi(p.f);
+ if(m<21||m>108){raf=requestAnimationFrame(loop);return;}
+ if(m===last)stable++;else{last=m;stable=1;}
+ if(stable>=5){var n=info(m);activate(m);readout.textContent='Note: '+n.name+n.oct;var now=Date.now();if(now-lastBar>300){makeBar(m,p.r);lastBar=now;}}
+ raf=requestAnimationFrame(loop);
+}
 function friendlyError(err){var name=err&&err.name?err.name:'UnknownError';if(name==='NotAllowedError'||name==='PermissionDeniedError')return 'Microphone permission was denied. Tap the page menu in Safari, open Website Settings, and set Microphone to Allow.';if(name==='NotFoundError')return 'No microphone was found on this device.';if(name==='NotReadableError')return 'The microphone is busy in another app. Close any app using it, then try again.';if(name==='SecurityError')return 'Safari blocked microphone access for this page.';return 'Microphone error: '+name+(err&&err.message?' — '+err.message:'');}
 async function start(){
  listen.disabled=true;
@@ -67,6 +86,7 @@ async function start(){
   data=new Float32Array(analyser.fftSize);
   source.connect(analyser);
   listening=true;
+  smoothLevel=0;armedUntil=0;quietFrames=0;
   listen.disabled=false;
   listen.textContent='Stop';
   listen.classList.add('on');
