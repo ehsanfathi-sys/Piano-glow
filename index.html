@@ -6,35 +6,85 @@
 <meta name="theme-color" content="#090b14">
 <title>Piano Glow</title>
 <style>
-:root{--glow:#60a5fa}*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#090b14;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{touch-action:manipulation}#app{height:100svh;display:grid;grid-template-rows:auto 1fr 30vh;background:radial-gradient(circle at 20% 10%,rgba(96,165,250,.15),transparent 36%),#090b14}header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:max(12px,env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid rgba(255,255,255,.16)}h1{margin:0;font-size:1.25rem}p{margin:3px 0 0;color:#aeb8d0;font-size:.85rem}.controls{display:flex;gap:10px;align-items:center}button{border:1px solid rgba(255,255,255,.18);background:#171b2d;color:#fff;border-radius:14px;padding:11px 14px;font:inherit;font-weight:800}#listen.on{background:#dc2626}#colour{width:48px;height:48px;padding:6px;background:conic-gradient(red,#ff0,#0f0,#0ff,#00f,#f0f,red)}#colour i{display:block;width:100%;height:100%;border-radius:9px;background:var(--glow);border:3px solid white}#palette{display:none;position:absolute;right:16px;top:74px;z-index:30;width:220px;padding:12px;border-radius:18px;background:#171b2d;border:1px solid rgba(255,255,255,.18);grid-template-columns:repeat(5,1fr);gap:9px}#palette.open{display:grid}.swatch{height:34px;padding:0;border-radius:9px}#visual{position:relative;overflow:hidden}.pill{position:absolute;top:16px;z-index:10;padding:8px 12px;border-radius:999px;background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.16);color:#b7c0d6}#status{left:50%;transform:translateX(-50%)}#readout{left:16px;border-radius:14px}.bar{position:absolute;bottom:-8px;width:25px;min-height:54px;border-radius:9px 9px 3px 3px;background:var(--glow);display:grid;place-items:center;font-weight:900;text-shadow:0 1px 3px #000;box-shadow:0 0 20px var(--glow);animation:rise 4.4s linear forwards}@keyframes rise{to{transform:translateY(-72vh);opacity:0}}#keyboardWrap{overflow-x:auto;overflow-y:hidden;background:#060810;-webkit-overflow-scrolling:touch}#keyboard{height:100%;min-width:1300px;position:relative;display:flex;padding-bottom:max(8px,env(safe-area-inset-bottom))}.white{position:relative;flex:1;height:100%;background:linear-gradient(#fff,#e8e8ef);border-right:1px solid #999;color:#171923;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;font-weight:800}.black{position:absolute;top:0;height:62%;width:1.25%;transform:translateX(-50%);z-index:5;background:linear-gradient(#272a36,#030407);border-radius:0 0 5px 5px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;font-size:.55rem;font-weight:800}.active{background:var(--glow)!important}@media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:1500px}}
+:root{--glow:#60a5fa}*{box-sizing:border-box}html,body{margin:0;height:100%;overflow:hidden;background:#090b14;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}body{touch-action:manipulation}#app{height:100svh;display:grid;grid-template-rows:auto 1fr 30vh;background:radial-gradient(circle at 20% 10%,rgba(96,165,250,.15),transparent 36%),#090b14}header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:max(12px,env(safe-area-inset-top)) 16px 10px;border-bottom:1px solid rgba(255,255,255,.16)}h1{margin:0;font-size:1.25rem}p{margin:3px 0 0;color:#aeb8d0;font-size:.85rem}.controls{display:flex;gap:10px;align-items:center}button{border:1px solid rgba(255,255,255,.18);background:#171b2d;color:#fff;border-radius:14px;padding:11px 14px;font:inherit;font-weight:800}button:disabled{opacity:.65}#listen.on{background:#dc2626}#colour{width:48px;height:48px;padding:6px;background:conic-gradient(red,#ff0,#0f0,#0ff,#00f,#f0f,red)}#colour i{display:block;width:100%;height:100%;border-radius:9px;background:var(--glow);border:3px solid white}#palette{display:none;position:absolute;right:16px;top:74px;z-index:30;width:220px;padding:12px;border-radius:18px;background:#171b2d;border:1px solid rgba(255,255,255,.18);grid-template-columns:repeat(5,1fr);gap:9px}#palette.open{display:grid}.swatch{height:34px;padding:0;border-radius:9px}#visual{position:relative;overflow:hidden}.pill{position:absolute;top:16px;z-index:10;padding:8px 12px;border-radius:999px;background:rgba(0,0,0,.38);border:1px solid rgba(255,255,255,.16);color:#b7c0d6;max-width:90%;text-align:center}#status{left:50%;transform:translateX(-50%)}#readout{left:16px;border-radius:14px}.bar{position:absolute;bottom:-8px;width:25px;min-height:54px;border-radius:9px 9px 3px 3px;background:var(--glow);display:grid;place-items:center;font-weight:900;text-shadow:0 1px 3px #000;box-shadow:0 0 20px var(--glow);animation:rise 4.4s linear forwards}@keyframes rise{to{transform:translateY(-72vh);opacity:0}}#keyboardWrap{overflow-x:auto;overflow-y:hidden;background:#060810;-webkit-overflow-scrolling:touch}#keyboard{height:100%;min-width:1300px;position:relative;display:flex;padding-bottom:max(8px,env(safe-area-inset-bottom))}.white{position:relative;flex:1;height:100%;background:linear-gradient(#fff,#e8e8ef);border-right:1px solid #999;color:#171923;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;font-weight:800}.black{position:absolute;top:0;height:62%;width:1.25%;transform:translateX(-50%);z-index:5;background:linear-gradient(#272a36,#030407);border-radius:0 0 5px 5px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;font-size:.55rem;font-weight:800}.active{background:var(--glow)!important}@media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:1500px}}
 </style>
 </head>
 <body>
 <div id="app">
-<header><div><h1>Piano Glow</h1><p>Play your piano and watch the notes rise.</p></div><div class="controls"><button id="listen">Start listening</button><button id="colour" aria-label="Choose colour"><i></i></button></div></header>
+<header><div><h1>Piano Glow</h1><p>Play your piano and watch the notes rise.</p></div><div class="controls"><button id="listen" type="button">Start listening</button><button id="colour" type="button" aria-label="Choose colour"><i></i></button></div></header>
 <div id="palette"></div>
 <section id="visual"><div id="readout" class="pill">Note: —</div><div id="status" class="pill">Tap Start listening</div></section>
 <section id="keyboardWrap"><div id="keyboard"></div></section>
 </div>
 <script>
-const names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'], whites=new Set(['C','D','E','F','G','A','B']);
-const colours=['#60a5fa','#22d3ee','#34d399','#a3e635','#facc15','#fb923c','#f87171','#f472b6','#c084fc','#818cf8','#fff','#94a3b8','#14b8a6','#84cc16','#eab308'];
-const keyboard=document.querySelector('#keyboard'),wrap=document.querySelector('#keyboardWrap'),visual=document.querySelector('#visual'),listen=document.querySelector('#listen'),status=document.querySelector('#status'),readout=document.querySelector('#readout'),palette=document.querySelector('#palette'),colour=document.querySelector('#colour');
-let keys=new Map(),whiteMidis=[],stream,ctx,analyser,data,raf,listening=false,last=null,stable=0,lastBar=0;
-function info(m){return{name:names[m%12],oct:Math.floor(m/12)-1}}
-for(let m=21;m<=108;m++)if(whites.has(info(m).name))whiteMidis.push(m);
-whiteMidis.forEach(m=>{let e=document.createElement('div'),n=info(m);e.className='white';e.textContent=n.name==='C'?n.name+n.oct:n.name;e.dataset.m=m;keyboard.append(e);keys.set(m,e)});
-for(let m=21;m<=108;m++){let n=info(m);if(!whites.has(n.name)){let e=document.createElement('div'),count=whiteMidis.filter(x=>x<m).length;e.className='black';e.textContent=n.name;e.dataset.m=m;e.style.left=(count/whiteMidis.length*100)+'%';keyboard.append(e);keys.set(m,e)}}
-setTimeout(()=>{let c=keys.get(60);if(c)wrap.scrollLeft=Math.max(0,c.offsetLeft-wrap.clientWidth/2)},80);
-colours.forEach(c=>{let b=document.createElement('button');b.className='swatch';b.style.background=c;b.onclick=()=>{document.documentElement.style.setProperty('--glow',c);palette.classList.remove('open')};palette.append(b)});colour.onclick=()=>palette.classList.toggle('open');
-function midi(f){return Math.round(69+12*Math.log2(f/440))}
-function pitch(buf,sr){let rms=Math.sqrt(buf.reduce((s,v)=>s+v*v,0)/buf.length);if(rms<.012)return null;let min=Math.floor(sr/4200),max=Math.min(Math.floor(sr/27),buf.length/2),best=0,bestLag=0;for(let lag=min;lag<=max;lag++){let sum=0;for(let i=0;i<buf.length-lag;i++)sum+=buf[i]*buf[i+lag];if(sum>best){best=sum;bestLag=lag}}return bestLag?{f:sr/bestLag,r:rms}:null}
-function activate(m){keys.forEach(k=>k.classList.remove('active'));let k=keys.get(m);if(k)k.classList.add('active')}
-function bar(m,r){let k=keys.get(m);if(!k)return;let kr=k.getBoundingClientRect(),wr=wrap.getBoundingClientRect(),x=kr.left+kr.width/2-wr.left;let e=document.createElement('div');e.className='bar';e.textContent=info(m).name;e.style.left=(x-12)+'px';e.style.height=(52+Math.min(75,r*800))+'px';visual.append(e);e.onanimationend=()=>e.remove()}
-function loop(){if(!listening)return;analyser.getFloatTimeDomainData(data);let p=pitch(data,ctx.sampleRate);if(!p){last=null;stable=0;keys.forEach(k=>k.classList.remove('active'));readout.textContent='Note: —';raf=requestAnimationFrame(loop);return}let m=midi(p.f);if(m<21||m>108){raf=requestAnimationFrame(loop);return}if(m===last)stable++;else{last=m;stable=1}if(stable>=3){let n=info(m);activate(m);readout.textContent='Note: '+n.name+n.oct;let now=performance.now();if(now-lastBar>240){bar(m,p.r);lastBar=now}}raf=requestAnimationFrame(loop)}
-async function start(){try{stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false}});ctx=new(window.AudioContext||window.webkitAudioContext)();await ctx.resume();let source=ctx.createMediaStreamSource(stream);analyser=ctx.createAnalyser();analyser.fftSize=4096;data=new Float32Array(analyser.fftSize);source.connect(analyser);listening=true;listen.textContent='Stop';listen.classList.add('on');status.textContent='Microphone is listening';loop()}catch(e){status.textContent='Microphone permission was blocked';alert('Please allow microphone access for Piano Glow in Safari, then try again.')}}
-function stop(){listening=false;cancelAnimationFrame(raf);if(stream)stream.getTracks().forEach(t=>t.stop());if(ctx)ctx.close();listen.textContent='Start listening';listen.classList.remove('on');status.textContent='Tap Start listening';readout.textContent='Note: —';keys.forEach(k=>k.classList.remove('active'))}
-listen.onclick=()=>listening?stop():start();
+(function(){
+'use strict';
+var names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
+var whites={C:true,D:true,E:true,F:true,G:true,A:true,B:true};
+var colours=['#60a5fa','#22d3ee','#34d399','#a3e635','#facc15','#fb923c','#f87171','#f472b6','#c084fc','#818cf8','#ffffff','#94a3b8','#14b8a6','#84cc16','#eab308'];
+var keyboard=document.getElementById('keyboard');
+var wrap=document.getElementById('keyboardWrap');
+var visual=document.getElementById('visual');
+var listen=document.getElementById('listen');
+var status=document.getElementById('status');
+var readout=document.getElementById('readout');
+var palette=document.getElementById('palette');
+var colour=document.getElementById('colour');
+var keys={};
+var whiteMidis=[];
+var stream=null,ctx=null,analyser=null,data=null,raf=null,listening=false,last=null,stable=0,lastBar=0;
+function info(m){return{name:names[m%12],oct:Math.floor(m/12)-1};}
+for(var m=21;m<=108;m++){if(whites[info(m).name])whiteMidis.push(m);}
+whiteMidis.forEach(function(m){var e=document.createElement('div');var n=info(m);e.className='white';e.textContent=n.name==='C'?n.name+n.oct:n.name;e.dataset.m=m;keyboard.appendChild(e);keys[m]=e;});
+for(var x=21;x<=108;x++){var n=info(x);if(!whites[n.name]){var b=document.createElement('div');var count=whiteMidis.filter(function(v){return v<x;}).length;b.className='black';b.textContent=n.name;b.dataset.m=x;b.style.left=(count/whiteMidis.length*100)+'%';keyboard.appendChild(b);keys[x]=b;}}
+setTimeout(function(){var c=keys[60];if(c)wrap.scrollLeft=Math.max(0,c.offsetLeft-wrap.clientWidth/2);},80);
+colours.forEach(function(c){var b=document.createElement('button');b.type='button';b.className='swatch';b.style.background=c;b.addEventListener('click',function(){document.documentElement.style.setProperty('--glow',c);palette.classList.remove('open');});palette.appendChild(b);});
+colour.addEventListener('click',function(){palette.classList.toggle('open');});
+function midi(f){return Math.round(69+12*Math.log(f/440)/Math.log(2));}
+function pitch(buf,sr){var sumSquares=0;for(var i=0;i<buf.length;i++)sumSquares+=buf[i]*buf[i];var rms=Math.sqrt(sumSquares/buf.length);if(rms<0.01)return null;var min=Math.floor(sr/4200),max=Math.min(Math.floor(sr/27),Math.floor(buf.length/2)),best=-1,bestLag=0;for(var lag=min;lag<=max;lag++){var sum=0;for(var j=0;j<buf.length-lag;j++)sum+=buf[j]*buf[j+lag];if(sum>best){best=sum;bestLag=lag;}}return bestLag?{f:sr/bestLag,r:rms}:null;}
+function activate(m){Object.keys(keys).forEach(function(k){keys[k].classList.remove('active');});if(keys[m])keys[m].classList.add('active');}
+function makeBar(m,r){var k=keys[m];if(!k)return;var kr=k.getBoundingClientRect(),wr=wrap.getBoundingClientRect(),x=kr.left+kr.width/2-wr.left;var e=document.createElement('div');e.className='bar';e.textContent=info(m).name;e.style.left=(x-12)+'px';e.style.height=(52+Math.min(75,r*800))+'px';visual.appendChild(e);e.addEventListener('animationend',function(){if(e.parentNode)e.parentNode.removeChild(e);});}
+function loop(){if(!listening)return;analyser.getFloatTimeDomainData(data);var p=pitch(data,ctx.sampleRate);if(!p){last=null;stable=0;activate(-1);readout.textContent='Note: —';raf=requestAnimationFrame(loop);return;}var m=midi(p.f);if(m<21||m>108){raf=requestAnimationFrame(loop);return;}if(m===last)stable++;else{last=m;stable=1;}if(stable>=3){var n=info(m);activate(m);readout.textContent='Note: '+n.name+n.oct;var now=Date.now();if(now-lastBar>240){makeBar(m,p.r);lastBar=now;}}raf=requestAnimationFrame(loop);}
+function friendlyError(err){var name=err&&err.name?err.name:'UnknownError';if(name==='NotAllowedError'||name==='PermissionDeniedError')return 'Microphone permission was denied. Tap the page menu in Safari, open Website Settings, and set Microphone to Allow.';if(name==='NotFoundError')return 'No microphone was found on this device.';if(name==='NotReadableError')return 'The microphone is busy in another app. Close any app using it, then try again.';if(name==='SecurityError')return 'Safari blocked microphone access for this page.';return 'Microphone error: '+name+(err&&err.message?' — '+err.message:'');}
+async function start(){
+ listen.disabled=true;
+ listen.textContent='Starting…';
+ status.textContent='Checking microphone support…';
+ try{
+  if(!window.isSecureContext)throw new Error('This page is not running securely.');
+  if(!navigator.mediaDevices||!navigator.mediaDevices.getUserMedia)throw new Error('This version of Safari does not provide microphone access here.');
+  status.textContent='Waiting for microphone permission…';
+  stream=await navigator.mediaDevices.getUserMedia({audio:true});
+  status.textContent='Starting audio detector…';
+  var AudioContextClass=window.AudioContext||window.webkitAudioContext;
+  if(!AudioContextClass)throw new Error('AudioContext is unavailable in this version of Safari.');
+  ctx=new AudioContextClass();
+  if(ctx.state==='suspended')await ctx.resume();
+  var source=ctx.createMediaStreamSource(stream);
+  analyser=ctx.createAnalyser();
+  analyser.fftSize=4096;
+  analyser.smoothingTimeConstant=0;
+  data=new Float32Array(analyser.fftSize);
+  source.connect(analyser);
+  listening=true;
+  listen.disabled=false;
+  listen.textContent='Stop';
+  listen.classList.add('on');
+  status.textContent='Microphone is listening';
+  loop();
+ }catch(err){
+  console.error(err);
+  if(stream){stream.getTracks().forEach(function(t){t.stop();});stream=null;}
+  listen.disabled=false;
+  listen.textContent='Try again';
+  listen.classList.remove('on');
+  status.textContent=friendlyError(err);
+ }
+}
+function stop(){listening=false;if(raf)cancelAnimationFrame(raf);if(stream){stream.getTracks().forEach(function(t){t.stop();});stream=null;}if(ctx){ctx.close();ctx=null;}listen.disabled=false;listen.textContent='Start listening';listen.classList.remove('on');status.textContent='Tap Start listening';readout.textContent='Note: —';activate(-1);}
+listen.addEventListener('click',function(){if(listening)stop();else start();});
+window.addEventListener('error',function(e){status.textContent='App error: '+e.message;});
+})();
 </script>
 </body>
 </html>
