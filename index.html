@@ -65,17 +65,16 @@
         <button id="settingsButton" aria-label="Detection settings">⚙︎</button>
       </div>
     </header>
-
     <div id="palette" aria-label="Colour palette"></div>
     <aside id="settings" aria-label="Detection settings">
       <div class="setting">
-        <div class="setting-row"><label for="confidence">AI confidence</label><output id="confidenceValue">64%</output></div>
-        <input id="confidence" type="range" min="45" max="85" value="64" step="1">
+        <div class="setting-row"><label for="confidence">AI confidence</label><output id="confidenceValue">50%</output></div>
+        <input id="confidence" type="range" min="35" max="85" value="50" step="1">
         <small>Higher rejects more doubtful notes. Keep this high if false notes matter more than missed notes.</small>
       </div>
       <div class="setting">
-        <div class="setting-row"><label for="frameConfidence">Sustain confidence</label><output id="frameConfidenceValue">28%</output></div>
-        <input id="frameConfidence" type="range" min="16" max="50" value="28" step="1">
+        <div class="setting-row"><label for="frameConfidence">Sustain confidence</label><output id="frameConfidenceValue">22%</output></div>
+        <input id="frameConfidence" type="range" min="12" max="50" value="22" step="1">
         <small>How strongly the model must believe a key remains down.</small>
       </div>
       <div class="setting">
@@ -83,18 +82,15 @@
         <input id="keySize" type="range" min="900" max="2400" value="1400" step="50">
       </div>
     </aside>
-
     <section id="visual">
       <div id="readout" class="pill">Note: —</div>
       <div id="status" class="pill">Tap Start listening</div>
       <div id="latency" class="pill">AI model idle</div>
       <div id="startupNotice"><div><strong>AI piano recognition</strong>The first start downloads and warms a small neural model. After that, notes are confirmed by both an onset detector and an active-key detector.</div></div>
     </section>
-
     <section id="keyboardWrap"><div id="keyboard"></div></section>
   </div>
-
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-  <script src="app.js?v=2" defer></script>
+  <script src="app.js?v=3" defer></script>
 </body>
 </html>
