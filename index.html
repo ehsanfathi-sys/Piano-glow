@@ -24,6 +24,7 @@ yin[0]=1;for(tau=1;tau<=maxTau;tau++){running+=yin[tau];yin[tau]=yin[tau]*tau/(r
 var chosen=-1,bestValue=1;for(tau=minTau;tau<maxTau;tau++){if(yin[tau]<.31&&yin[tau]<=yin[tau-1]&&yin[tau]<yin[tau+1]){chosen=tau;break;}if(yin[tau]<bestValue){bestValue=yin[tau];chosen=tau;}}
 if(chosen<0||yin[chosen]>.50)return null;
 while(chosen+1<maxTau&&yin[chosen+1]<yin[chosen])chosen++;
+var halfTau=Math.round(chosen/2);if(halfTau>=minTau&&yin[halfTau]<.42&&yin[halfTau]<yin[chosen]*1.35){var local=halfTau;for(var j=Math.max(minTau,halfTau-2);j<=Math.min(maxTau-1,halfTau+2);j++)if(yin[j]<yin[local])local=j;chosen=local;}
 var better=chosen,a=yin[chosen-1],b=yin[chosen],c=yin[chosen+1],den=a-2*b+c;if(Math.abs(den)>1e-9)better=chosen+(a-c)/(2*den);
 return{freq:sr/better,quality:1-yin[chosen]};}
 function midi(f){return Math.round(69+12*Math.log(f/440)/Math.log(2));}
