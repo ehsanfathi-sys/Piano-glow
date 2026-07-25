@@ -1,1 +1,100 @@
-<!doctype html><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Piano Glow</title><body style="margin:0;background:#090b14;color:white;font-family:sans-serif"><div id="loading" style="padding:24px">Loading Piano Glow…</div><script>(async()=>{try{let encoded="";for(const part of ["app.gz.1","app.gz.2","app.gz.3"]){const response=await fetch(part+"?v=5",{cache:"no-store"});if(!response.ok)throw new Error("Missing app file: "+part);encoded+=(await response.text()).trim()}encoded=encoded.replace(/\s/g,"").replace(/-/g,"+").replace(/_/g,"/");while(encoded.length%4)encoded+="=";let decoded;try{decoded=atob(encoded)}catch(error){throw new Error("The app data is damaged. Please redeploy app.gz.1, app.gz.2 and app.gz.3.")}const bytes=Uint8Array.from(decoded,char=>char.charCodeAt(0));const html=await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("gzip"))).text();const patch=`<script>(function(){var K="pianoGlowSettingsV1",ids=["keySize","micSensitivity","accuracy","speed","duplicateGuard","softNoteBoost"];function save(){try{var v={};ids.forEach(function(id){var e=document.getElementById(id);if(e)v[id]=Number(e.value)});v.glow=getComputedStyle(document.documentElement).getPropertyValue("--glow").trim()||"#60a5fa";localStorage.setItem(K,JSON.stringify(v))}catch(e){}}function clampControl(id,low,high){var e=document.getElementById(id);if(!e)return;var min=Number(e.min),max=Number(e.max),value=Number(e.value);if(!isFinite(min)||!isFinite(max)||max<=min)return;var floor=min+(max-min)*low,ceiling=min+(max-min)*high,next=Math.min(ceiling,Math.max(floor,value));if(Math.abs(next-value)>.0001){e.value=String(next);e.dispatchEvent(new Event("input",{bubbles:true}));e.dispatchEvent(new Event("change",{bubbles:true}))}}ids.forEach(function(id){var e=document.getElementById(id);if(e){e.addEventListener("input",save);e.addEventListener("change",save)}});document.querySelectorAll(".swatch").forEach(function(e){e.addEventListener("click",function(){setTimeout(save,0)})});clampControl("accuracy",.78,1);clampControl("duplicateGuard",.72,1);clampControl("micSensitivity",0,.55);clampControl("softNoteBoost",0,.32);window.addEventListener("pagehide",save);window.addEventListener("beforeunload",save);save();var D=700;function sustained(b){var m=((b.className||"")+" "+(b.getAttribute("data-state")||"")+" "+(b.getAttribute("data-sustained")||"")).toLowerCase();return m.indexOf("sustain")!==-1||m.indexOf("long")!==-1||b.getAttribute("data-sustained")==="true"}function longGate(b){if(!b||b.nodeType!==1||!b.classList.contains("bar")||b.dataset.longGateReady)return;b.dataset.longGateReady="1";var d=b.style.animationDuration,p=b.style.animationPlayState;b.style.setProperty("animation-duration","2.8s","important");setTimeout(function(){if(!b.isConnected)return;if(sustained(b)){if(d)b.style.animationDuration=d;else b.style.removeProperty("animation-duration");if(p)b.style.animationPlayState=p}},D)}var lastMidi=null,lastTime=0,lastText="Note: —",lastBar=null;function related(a,b){var d=Math.abs(a-b);return d<=2||(d>0&&d%12===0)}function findKey(m){return document.querySelector('[data-midi="'+m+'"],[data-note-midi="'+m+'"]')}function rejectBar(b){var m=Number(b.dataset.midi);b.remove();document.querySelectorAll(".active").forEach(function(k){var km=Number(k.getAttribute("data-midi")||k.getAttribute("data-note-midi"));if(!isFinite(km)||km===m)k.classList.remove("active")});var old=findKey(lastMidi);if(old)old.classList.add("active");var r=document.getElementById("readout");if(r)r.textContent=lastText}function noteGate(b){if(!b||b.nodeType!==1||!b.classList.contains("bar")||b.dataset.noteGateReady)return;b.dataset.noteGateReady="1";var midi=Number(b.dataset.midi),now=performance.now();if(!isFinite(midi)){longGate(b);return}var elapsed=now-lastTime,hard=170,linked=lastBar&&sustained(lastBar)?1400:560;if(lastMidi!==null&&(elapsed<hard||(related(midi,lastMidi)&&elapsed<linked))){rejectBar(b);return}lastMidi=midi;lastTime=now;lastBar=b;var r=document.getElementById("readout");if(r)lastText=r.textContent;longGate(b)}function scan(n){if(!n||n.nodeType!==1)return;if(n.classList&&n.classList.contains("bar"))noteGate(n);if(n.querySelectorAll)n.querySelectorAll(".bar").forEach(noteGate)}document.querySelectorAll(".bar").forEach(noteGate);new MutationObserver(function(rs){rs.forEach(function(r){r.addedNodes.forEach(scan)})}).observe(document.documentElement,{childList:true,subtree:true})})();<\/script>`;let saved=null;try{saved=JSON.parse(localStorage.getItem("pianoGlowSettingsV1")||"null")}catch(error){}let finalHtml=html;if(saved&&typeof saved==="object"){const values={keySize:saved.keySize,micSensitivity:saved.micSensitivity,accuracy:saved.accuracy,speed:saved.speed,duplicateGuard:saved.duplicateGuard,softNoteBoost:saved.softNoteBoost};for(const[id,value]of Object.entries(values)){if(value!==undefined&&value!==null){const expression=new RegExp('(<input[^>]*id="'+id+'"[^>]*value=")[^"]*(")');finalHtml=finalHtml.replace(expression,'$1'+String(value)+'$2')}}if(typeof saved.glow==="string"&&/^#[0-9a-f]{3,8}$/i.test(saved.glow))finalHtml=finalHtml.replace(/--glow:#[0-9a-f]{3,8}/i,"--glow:"+saved.glow)}finalHtml=finalHtml.replace("</body>",patch+"</body>");document.open();document.write(finalHtml);document.close()}catch(error){document.getElementById("loading").textContent="Piano Glow could not load: "+error.message}})();</script>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <title>Piano Glow</title>
+  <style>
+    :root{--glow:#60a5fa;--keyboard-width:1400px;--panel:#171b2d;--muted:#aeb8d0}
+    *{box-sizing:border-box}
+    html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090b14;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+    body{position:fixed;inset:0}
+    button,input{font:inherit}
+    #app{position:absolute;inset:0;width:100vw;height:100vh;height:100dvh;display:grid;grid-template-rows:auto 1fr 30vh}
+    header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #ffffff25;background:#090b14ee;z-index:20}
+    h1{margin:0;font-size:1.2rem;line-height:1.1}
+    header p{margin:4px 0 0;color:var(--muted);font-size:.78rem}
+    .controls{display:flex;gap:8px;align-items:center}
+    button{border:1px solid #ffffff28;background:var(--panel);color:#fff;border-radius:13px;padding:10px 13px;font-weight:800;min-height:44px}
+    button:disabled{opacity:.55}
+    #listen.on{background:#dc2626}
+    #colour{width:46px;padding:6px}
+    #colour i{display:block;width:100%;height:30px;border-radius:8px;background:var(--glow);border:2px solid #fff}
+    #settingsButton{width:46px;padding:0;font-size:1.15rem}
+    #palette{display:none;position:absolute;right:62px;top:68px;z-index:40;width:220px;padding:12px;border-radius:18px;background:var(--panel);border:1px solid #ffffff2b;grid-template-columns:repeat(5,1fr);gap:9px;box-shadow:0 14px 40px #0008}
+    #palette.open{display:grid}
+    .swatch{height:34px;padding:0;border-radius:9px;min-height:34px}
+    #settings{display:none;position:absolute;right:14px;top:68px;z-index:45;width:min(310px,calc(100vw - 28px));padding:14px;border-radius:18px;background:var(--panel);border:1px solid #ffffff2b;box-shadow:0 14px 40px #0009}
+    #settings.open{display:block}
+    .setting{margin-bottom:13px}
+    .setting:last-child{margin-bottom:0}
+    .setting-row{display:flex;justify-content:space-between;gap:14px;margin-bottom:5px;font-size:.8rem;font-weight:750}
+    .setting small{display:block;color:var(--muted);font-size:.68rem;line-height:1.3;margin-top:3px}
+    input[type=range]{width:100%;accent-color:var(--glow)}
+    #visual{position:relative;overflow:hidden;background:radial-gradient(circle at 20% 10%,#60a5fa26,transparent 36%),linear-gradient(#0b1020,#090b14)}
+    .pill{position:absolute;top:14px;z-index:10;padding:8px 12px;border-radius:999px;background:#0009;border:1px solid #ffffff29;color:#d4daf0;font-size:.78rem;backdrop-filter:blur(8px)}
+    #status{left:50%;transform:translateX(-50%);white-space:nowrap;max-width:62%;overflow:hidden;text-overflow:ellipsis}
+    #readout{left:14px;font-weight:850}
+    #latency{right:14px;color:#aeb8d0}
+    .bar{position:absolute;bottom:-10px;min-height:54px;border-radius:9px 9px 3px 3px;background:var(--glow);display:grid;place-items:start center;padding-top:10px;font-weight:900;text-shadow:0 1px 3px #000;box-shadow:0 0 22px var(--glow);animation:rise 4.2s linear forwards;overflow:hidden;will-change:transform,height,opacity;transition:height .08s linear}
+    .bar .label{position:sticky;top:8px;pointer-events:none}
+    @keyframes rise{0%{transform:translateY(0);opacity:1}82%{opacity:1}100%{transform:translateY(-78vh);opacity:0}}
+    #keyboardWrap{overflow-x:auto;overflow-y:hidden;background:#060810;-webkit-overflow-scrolling:touch}
+    #keyboard{height:100%;min-width:var(--keyboard-width);position:relative;display:flex;user-select:none}
+    .white{position:relative;flex:1;height:100%;background:linear-gradient(#fff,#e8e8ef);border-right:1px solid #999;color:#171923;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;font-weight:800;font-size:.72rem;transition:background .05s}
+    .black{position:absolute;top:0;height:62%;width:1.25%;transform:translateX(-50%);z-index:5;background:linear-gradient(#272a36,#030407);border-radius:0 0 5px 5px;color:#fff;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;font-size:.5rem;font-weight:800;transition:background .05s}
+    .active{background:var(--glow)!important;box-shadow:0 0 25px var(--glow)}
+    #startupNotice{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:#d8def2;pointer-events:none}
+    #startupNotice div{max-width:560px;padding:18px 22px;border-radius:18px;background:#0005;border:1px solid #ffffff20}
+    #startupNotice strong{display:block;margin-bottom:7px}
+    @media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:max(var(--keyboard-width),1500px)}#latency{display:none}header p{display:none}.controls{gap:6px}button{padding:9px 11px}}
+  </style>
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div>
+        <h1>Piano Glow</h1>
+        <p>Neural 88-key onset-and-frame detection</p>
+      </div>
+      <div class="controls">
+        <button id="listen">Start listening</button>
+        <button id="colour" aria-label="Choose colour"><i></i></button>
+        <button id="settingsButton" aria-label="Detection settings">⚙︎</button>
+      </div>
+    </header>
+
+    <div id="palette" aria-label="Colour palette"></div>
+    <aside id="settings" aria-label="Detection settings">
+      <div class="setting">
+        <div class="setting-row"><label for="confidence">AI confidence</label><output id="confidenceValue">64%</output></div>
+        <input id="confidence" type="range" min="45" max="85" value="64" step="1">
+        <small>Higher rejects more doubtful notes. Keep this high if false notes matter more than missed notes.</small>
+      </div>
+      <div class="setting">
+        <div class="setting-row"><label for="frameConfidence">Sustain confidence</label><output id="frameConfidenceValue">28%</output></div>
+        <input id="frameConfidence" type="range" min="16" max="50" value="28" step="1">
+        <small>How strongly the model must believe a key remains down.</small>
+      </div>
+      <div class="setting">
+        <div class="setting-row"><label for="keySize">Key width</label><output id="keySizeValue">1400 px</output></div>
+        <input id="keySize" type="range" min="900" max="2400" value="1400" step="50">
+      </div>
+    </aside>
+
+    <section id="visual">
+      <div id="readout" class="pill">Note: —</div>
+      <div id="status" class="pill">Tap Start listening</div>
+      <div id="latency" class="pill">AI model idle</div>
+      <div id="startupNotice"><div><strong>AI piano recognition</strong>The first start downloads and warms a small neural model. After that, notes are confirmed by both an onset detector and an active-key detector.</div></div>
+    </section>
+
+    <section id="keyboardWrap"><div id="keyboard"></div></section>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
+  <script src="app.js?v=1" defer></script>
+</body>
+</html>
