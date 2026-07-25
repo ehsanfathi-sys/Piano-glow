@@ -2,7 +2,7 @@
 'use strict';
 const MODEL_URL='https://cdn.jsdelivr.net/npm/@spotify/basic-pitch@1.0.1/model/model.json';
 const SR=22050,HOP=256,WIN=SR*2-HOP,MIDI0=21,NKEYS=88;
-const SETTINGS='pianoGlowAiSettingsV4',CAL_KEY='pianoGlowCalibrationV1';
+const SETTINGS='pianoGlowAiSettingsV4',CAL_KEY='pianoGlowCalibrationV2';
 const names=['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'];
 const white=new Set(['C','D','E','F','G','A','B']);
 const colours=['#60a5fa','#22d3ee','#34d399','#a3e635','#facc15','#fb923c','#f87171','#f472b6','#c084fc','#818cf8','#ffffff','#94a3b8','#14b8a6','#84cc16','#eab308'];
@@ -12,7 +12,7 @@ const confidence=$('confidence'),frameConfidence=$('frameConfidence'),keySize=$(
 const calOverlay=$('calibration'),calTitle=$('calTitle'),calDetail=$('calDetail'),calProgress=$('calProgress'),calCancel=$('calCancel'),calSkip=$('calSkip'),calReset=$('calReset');
 const keys=new Map(),active=new Map(),recent=new Map();
 let model=null,modelPromise=null,backend='unknown',stream=null,ctx=null,source=null,processor=null,gain=null,listening=false,busy=false,ring=null,lastFrame=-Infinity,inferenceCount=0,avgMs=0,lastLevel=0,lastMaxOnset=0,lastMaxFrame=0,diagTimer=null;
-let calibration=loadCalibration(),calState=null,lastAcceptedAt=0;
+let calibration=loadCalibration(),calState=null,lastAcceptedAt=0,calNoise=.00003,calPrevLevel=0;
 class Ring{constructor(n){this.a=new Float32Array(n);this.i=0;this.n=0;this.total=0}push(x){for(let j=0;j<x.length;j++){this.a[this.i]=x[j];this.i=(this.i+1)%this.a.length}this.n=Math.min(this.a.length,this.n+x.length);this.total+=x.length}latest(n){const out=new Float32Array(n),size=Math.min(n,this.n),pad=n-size;let s=(this.i-size+this.a.length)%this.a.length;for(let j=0;j<size;j++)out[pad+j]=this.a[(s+j)%this.a.length];return out}}
 function info(m){return{name:names[m%12],oct:Math.floor(m/12)-1,label:names[m%12]+(Math.floor(m/12)-1)}}
 function buildKeyboard(){const whites=[];for(let m=21;m<=108;m++)if(white.has(info(m).name))whites.push(m);for(const m of whites){const e=document.createElement('div'),n=info(m);e.className='white';e.dataset.midi=m;e.textContent=n.name==='C'?n.label:n.name;keyboard.appendChild(e);keys.set(m,e)}for(let m=21;m<=108;m++){const n=info(m);if(white.has(n.name))continue;const e=document.createElement('div');e.className='black';e.dataset.midi=m;e.textContent=n.name;e.style.left=(whites.filter(v=>v<m).length/whites.length*100)+'%';keyboard.appendChild(e);keys.set(m,e)}}
@@ -28,8 +28,9 @@ function loadCalibration(){try{const x=JSON.parse(localStorage.getItem(CAL_KEY)|
 function saveCalibration(){try{localStorage.setItem(CAL_KEY,JSON.stringify(calibration))}catch(e){}}
 function normalise(v){let s=0;for(const x of v)s+=x*x;if(!s)return v.map(()=>0);const q=Math.sqrt(s);return v.map(x=>x/q)}
 function similarity(a,b){if(!a||!b||a.length!==b.length)return 0;let s=0;for(let i=0;i<a.length;i++)s+=a[i]*b[i];return s}
-function featureVector(frames,onsets,fi){const v=new Array(NKEYS*2).fill(0);for(let j=Math.max(0,fi-2);j<=Math.min(frames.length-1,fi+5);j++){const fr=frames[j]||[],on=onsets[j]||[];for(let k=0;k<NKEYS;k++){v[k]=Math.max(v[k],on[k]||0);v[NKEYS+k]=Math.max(v[NKEYS+k],fr[k]||0)}}return normalise(v)}
-function calibratedDecision(m,vec){const own=calibration[m];if(!own)return{ok:true,own:0,bestOther:0};const ownScore=similarity(vec,own);let bestOther=0,bestMidi=null;for(const[key,value]of Object.entries(calibration)){const n=+key;if(n===m)continue;const s=similarity(vec,value);if(s>bestOther){bestOther=s;bestMidi=n}}return{ok:ownScore>=0.55&&ownScore>=bestOther+0.025,own:ownScore,bestOther,bestMidi}}
+function goertzel(x,f){if(f<18||f>SR/2-50)return 0;const w=2*Math.PI*f/SR,c=2*Math.cos(w);let s0=0,s1=0,s2=0;for(let i=0;i<x.length;i++){const win=.5-.5*Math.cos(2*Math.PI*i/(x.length-1));s0=x[i]*win+c*s1-s2;s2=s1;s1=s0}return Math.max(0,s1*s1+s2*s2-c*s1*s2)}
+function harmonicFingerprint(audio,midi,center){const len=Math.min(8192,audio.length),start=Math.max(0,Math.min(audio.length-len,Math.round(center-len*.12))),x=audio.subarray(start,start+len),f0=440*Math.pow(2,(midi-69)/12),v=[];for(let h=1;h<=14;h++){const f=f0*h;if(f>SR/2-80){v.push(0);continue}const p=Math.max(goertzel(x,f*.992),goertzel(x,f),goertzel(x,f*1.008));v.push(Math.log1p(p))}return normalise(v)}
+function calibratedDecision(m,vec){const own=calibration[m];if(!own)return{ok:true,own:0,bestOther:0};const ownScore=similarity(vec,own);let bestOther=0,bestMidi=null;for(const[key,value]of Object.entries(calibration)){const n=+key;if(n===m||Math.abs(n-m)>12)continue;const s=similarity(vec,value);if(s>bestOther){bestOther=s;bestMidi=n}}return{ok:ownScore>=.72&&ownScore>=bestOther+.035,own:ownScore,bestOther,bestMidi}}
 async function chooseBackend(){if(!window.tf)throw Error('TensorFlow failed to load');for(const b of ['webgl','cpu']){try{if(await tf.setBackend(b)){await tf.ready();backend=tf.getBackend();return}}catch(e){}}throw Error('No compatible AI backend')}
 async function loadModel(){if(model)return model;if(modelPromise)return modelPromise;modelPromise=(async()=>{listen.disabled=true;calibrate.disabled=true;status.textContent='Loading neural piano model…';latency.textContent='Downloading AI model';await chooseBackend();const m=await tf.loadGraphModel(MODEL_URL);status.textContent='Warming neural model…';const z=tf.zeros([1,WIN,1]);let o;try{o=await m.executeAsync(z,['Identity_1','Identity_2','Identity']);(Array.isArray(o)?o:[o]).forEach(t=>t&&t.dispose&&t.dispose())}finally{z.dispose()}model=m;listen.disabled=false;calibrate.disabled=false;latency.textContent='AI ready • '+backend;return model})().catch(e=>{modelPromise=null;listen.disabled=false;calibrate.disabled=false;throw e});return modelPromise}
 function makeBar(m,c){const b=document.createElement('div'),l=document.createElement('span');b.className='bar';b.dataset.midi=m;b.style.height=(54+Math.min(72,c*80))+'px';l.className='label';l.textContent=info(m).name;b.appendChild(l);visual.appendChild(b);syncBar(b);b.addEventListener('animationend',()=>b.remove());return b}
@@ -37,88 +38,17 @@ function activate(m,c,sample){if(active.has(m))return;const t=sample/SR;if(t-(re
 function sustain(st,sample){st.release=0;const d=(sample-st.start)/SR;if(d>=.7)st.sustained=true;if(st.sustained&&st.bar.isConnected)st.bar.style.height=(54+Math.min(260,d*105))+'px'}
 function release(m){const st=active.get(m);if(!st)return;if(st.key)st.key.classList.remove('active');active.delete(m)}
 function nearbyFramePeak(frames,fi,k){let peak=0;for(let j=Math.max(0,fi-2);j<=Math.min(frames.length-1,fi+5);j++){const row=frames[j];if(row&&row[k]>peak)peak=row[k]}return peak}
-function beginCalibration(){
-  if(listening){status.textContent='Stop listening before calibration';return}
-  calState={midi:21,takes:[],lastCapture:0,lastHint:0};
-  calOverlay.classList.add('open');updateCalibrationUI();
-}
-function updateCalibrationUI(){
-  if(!calState)return;
-  const n=info(calState.midi),done=Object.keys(calibration).length;
-  calTitle.textContent='Play '+n.label;
-  calDetail.textContent='Strike this key clearly, then let it fade. Example '+(calState.takes.length+1)+' of 3.';
-  calProgress.textContent=done+' of 88 keys saved';
-  document.querySelectorAll('.cal-target').forEach(e=>e.classList.remove('cal-target'));
-  const k=keys.get(calState.midi);if(k)k.classList.add('cal-target');
-  focusKey(calState.midi);
-}
+function beginCalibration(){if(listening){status.textContent='Stop listening before calibration';return}calState={midi:21,takes:[],lastCapture:0,pending:false};calNoise=.00003;calPrevLevel=0;calOverlay.classList.add('open');updateCalibrationUI()}
+function updateCalibrationUI(){if(!calState)return;const n=info(calState.midi),done=Object.keys(calibration).length;calTitle.textContent='Play '+n.label;calDetail.textContent='The next clear piano strike will be saved as '+n.label+'. Example '+(calState.takes.length+1)+' of 3.';calProgress.textContent=done+' of 88 keys saved';document.querySelectorAll('.cal-target').forEach(e=>e.classList.remove('cal-target'));const k=keys.get(calState.midi);if(k)k.classList.add('cal-target');focusKey(calState.midi)}
 function finishCalibration(){document.querySelectorAll('.cal-target').forEach(e=>e.classList.remove('cal-target'));calState=null;calOverlay.classList.remove('open');status.textContent='Calibration saved • '+Object.keys(calibration).length+' keys'}
-function advanceCalibration(){
-  if(!calState)return;
-  calState.midi++;
-  calState.takes=[];
-  if(calState.midi>108){finishCalibration();return}
-  updateCalibrationUI();
-}
-function captureCalibration(m,vec,confidenceScore){
-  if(!calState||m!==calState.midi)return;
-  const now=performance.now();if(now-calState.lastCapture<950||confidenceScore<0.18)return;
-  calState.lastCapture=now;calState.takes.push(vec);
-  if(calState.takes.length<3){calDetail.textContent='Good. Play '+info(m).label+' again — example '+(calState.takes.length+1)+' of 3.';return}
-  const avg=new Array(vec.length).fill(0);
-  for(const take of calState.takes)for(let i=0;i<avg.length;i++)avg[i]+=take[i]/calState.takes.length;
-  calibration[m]=normalise(avg);saveCalibration();
-  const k=keys.get(m);if(k){k.classList.add('active');setTimeout(()=>k.classList.remove('active'),260)}
-  advanceCalibration();
-}
-function processFrames(frames,onsets,startSample){
-  const ot=+confidence.value/100,ft=+frameConfidence.value/100,head=10,tail=20,last=Math.max(head,frames.length-tail);
-  for(let fi=head;fi<last;fi++){
-    const sample=startSample+fi*HOP;if(sample<=lastFrame)continue;lastFrame=sample;
-    const fr=frames[fi],on=onsets[fi];if(!fr||!on)continue;
-
-    let bestIndex=0,bestOnset=0;
-    for(let k=0;k<NKEYS;k++)if((on[k]||0)>bestOnset){bestOnset=on[k]||0;bestIndex=k}
-
-    if(calState){
-      const targetIndex=calState.midi-MIDI0;
-      const targetOnset=on[targetIndex]||0;
-      const targetSupport=nearbyFramePeak(frames,fi,targetIndex);
-      const targetScore=Math.max(targetOnset,targetSupport*.8);
-      if(targetOnset>lastMaxOnset)lastMaxOnset=targetOnset;
-      if(targetSupport>lastMaxFrame)lastMaxFrame=targetSupport;
-      if(targetOnset>=.16&&targetSupport>=.035){
-        captureCalibration(calState.midi,featureVector(frames,onsets,fi),targetScore);
-      }else if(bestOnset>=.28&&performance.now()-calState.lastHint>650){
-        calState.lastHint=performance.now();
-        const heard=info(MIDI0+bestIndex).label,wanted=info(calState.midi).label;
-        calDetail.textContent=heard===wanted
-          ? 'I hear '+heard+', but the strike is too soft or still ringing. Play it once, clearly.'
-          : 'I heard '+heard+'. Please play the highlighted '+wanted+' key.';
-      }
-      continue;
-    }
-
-    for(let k=0;k<NKEYS;k++){
-      const m=MIDI0+k,oc=on[k]||0,fc=fr[k]||0;
-      if(oc>lastMaxOnset)lastMaxOnset=oc;if(fc>lastMaxFrame)lastMaxFrame=fc;
-      if(oc>=Math.min(ot,.55)){
-        const support=nearbyFramePeak(frames,fi,k);
-        if(support>lastMaxFrame)lastMaxFrame=support;
-        if(!active.has(m)&&oc>=ot&&support>=ft){
-          const vec=featureVector(frames,onsets,fi),decision=calibratedDecision(m,vec);
-          if(decision.ok&&performance.now()-lastAcceptedAt>90){activate(m,oc,sample);lastAcceptedAt=performance.now()}
-        }
-      }
-      const st=active.get(m);if(!st)continue;
-      if(fc>=Math.max(.07,ft*.65))sustain(st,sample);else if(++st.release>=7)release(m);
-    }
-  }
-}
+function advanceCalibration(){if(!calState)return;calState.midi++;calState.takes=[];calState.pending=false;if(calState.midi>108){finishCalibration();closeAudio();return}updateCalibrationUI()}
+function storeCalibrationTake(vec){if(!calState)return;const m=calState.midi;calState.takes.push(vec);calState.pending=false;calState.lastCapture=performance.now();if(calState.takes.length<3){calDetail.textContent='Captured. Let the note fade, then play '+info(m).label+' again — example '+(calState.takes.length+1)+' of 3.';return}const avg=new Array(vec.length).fill(0);for(const take of calState.takes)for(let i=0;i<avg.length;i++)avg[i]+=take[i]/calState.takes.length;calibration[m]=normalise(avg);saveCalibration();const k=keys.get(m);if(k){k.classList.add('active');setTimeout(()=>k.classList.remove('active'),260)}advanceCalibration()}
+function scheduleRawCalibrationCapture(){if(!calState||calState.pending||!ring||!ctx)return;calState.pending=true;calDetail.textContent='Strike heard — recording '+info(calState.midi)+'…';setTimeout(()=>{if(!calState||!ring||!ctx)return;const sourceLength=Math.min(ring.n,Math.round(ctx.sampleRate*.75));if(sourceLength<2048){calState.pending=false;return}const raw=ring.latest(sourceLength),audio=resample(raw,ctx.sampleRate,SR,Math.round(SR*.75)),vec=harmonicFingerprint(audio,calState.midi,Math.round(SR*.18));storeCalibrationTake(vec)},260)}
+function processFrames(frames,onsets,startSample,audioWindow){const ot=+confidence.value/100,ft=+frameConfidence.value/100,head=10,tail=20,last=Math.max(head,frames.length-tail);for(let fi=head;fi<last;fi++){const sample=startSample+fi*HOP;if(sample<=lastFrame)continue;lastFrame=sample;const fr=frames[fi],on=onsets[fi];if(!fr||!on)continue;if(calState)continue;for(let k=0;k<NKEYS;k++){const m=MIDI0+k,oc=on[k]||0,fc=fr[k]||0;if(oc>lastMaxOnset)lastMaxOnset=oc;if(fc>lastMaxFrame)lastMaxFrame=fc;if(oc>=Math.min(ot,.55)){const support=nearbyFramePeak(frames,fi,k);if(support>lastMaxFrame)lastMaxFrame=support;if(!active.has(m)&&oc>=ot&&support>=ft){const vec=harmonicFingerprint(audioWindow,m,fi*HOP),decision=calibratedDecision(m,vec);if(decision.ok&&performance.now()-lastAcceptedAt>90){activate(m,oc,sample);lastAcceptedAt=performance.now()}}}const st=active.get(m);if(!st)continue;if(fc>=Math.max(.07,ft*.65))sustain(st,sample);else if(++st.release>=7)release(m)}}}
 function resample(input,inRate,outRate,n){const out=new Float32Array(n),ratio=inRate/outRate;for(let i=0;i<n;i++){const p=i*ratio,l=Math.floor(p),r=Math.min(input.length-1,l+1),q=p-l;out[i]=(input[l]||0)*(1-q)+(input[r]||0)*q}return out}
-async function infer(){if((!listening&&!calState)||busy||!model||!ring||!ctx)return;const inputLength=Math.round(WIN*ctx.sampleRate/SR);if(ring.n<inputLength)return;busy=true;const t0=performance.now(),raw=ring.latest(inputLength),windowData=resample(raw,ctx.sampleRate,SR,WIN),end=Math.round(ring.total*SR/ctx.sampleRate),start=end-WIN,input=tf.tensor3d(windowData,[1,WIN,1]);let out;try{out=await model.executeAsync(input,['Identity_1','Identity_2','Identity']);if(!Array.isArray(out)||out.length<2)throw Error('Unexpected neural model output');const frames=(await out[0].array())[0],onsets=(await out[1].array())[0];processFrames(frames,onsets,start);inferenceCount++}catch(e){status.textContent='AI inference error: '+(e.message||e.name)}finally{input.dispose();if(Array.isArray(out))out.forEach(t=>t.dispose());busy=false;const ms=performance.now()-t0;avgMs+=(ms-avgMs)/Math.min(Math.max(inferenceCount,1),12);latency.textContent='AI '+Math.round(avgMs)+' ms • '+backend}}
-function audio(e){if((!listening&&!calState)||!ring)return;const x=e.inputBuffer.getChannelData(0),copy=new Float32Array(x);ring.push(copy);let sum=0;for(const v of copy)sum+=v*v;lastLevel=Math.sqrt(sum/copy.length);if(!busy)infer()}
-function updateDiagnostics(){if((!listening&&!calState)||!ctx||!ring)return;const need=Math.round(WIN*ctx.sampleRate/SR),pct=Math.min(100,Math.round(ring.n/need*100)),level=Math.round(lastLevel*10000)/10;if(ring.n<need)status.textContent=(calState?'Calibration':'Listening')+' • filling AI window '+pct+'%';else if(!calState)status.textContent='mic '+level+' • passes '+inferenceCount+' • onset '+lastMaxOnset.toFixed(2)+' • frame '+lastMaxFrame.toFixed(2)+' • calibrated '+Object.keys(calibration).length}
+async function infer(){if((!listening&&!calState)||busy||!model||!ring||!ctx)return;const inputLength=Math.round(WIN*ctx.sampleRate/SR);if(ring.n<inputLength)return;busy=true;const t0=performance.now(),raw=ring.latest(inputLength),windowData=resample(raw,ctx.sampleRate,SR,WIN),end=Math.round(ring.total*SR/ctx.sampleRate),start=end-WIN,input=tf.tensor3d(windowData,[1,WIN,1]);let out;try{out=await model.executeAsync(input,['Identity_1','Identity_2','Identity']);if(!Array.isArray(out)||out.length<2)throw Error('Unexpected neural model output');const frames=(await out[0].array())[0],onsets=(await out[1].array())[0];processFrames(frames,onsets,start,windowData);inferenceCount++}catch(e){status.textContent='AI inference error: '+(e.message||e.name)}finally{input.dispose();if(Array.isArray(out))out.forEach(t=>t.dispose());busy=false;const ms=performance.now()-t0;avgMs+=(ms-avgMs)/Math.min(Math.max(inferenceCount,1),12);latency.textContent='AI '+Math.round(avgMs)+' ms • '+backend}}
+function audio(e){if((!listening&&!calState)||!ring)return;const x=e.inputBuffer.getChannelData(0),copy=new Float32Array(x);ring.push(copy);let sum=0;for(const v of copy)sum+=v*v;lastLevel=Math.sqrt(sum/copy.length);if(calState&&!calState.pending){const now=performance.now(),threshold=Math.max(.000035,calNoise*1.8),rise=lastLevel>Math.max(threshold,calPrevLevel*1.35);if(now-calState.lastCapture>1100&&rise)scheduleRawCalibrationCapture();if(lastLevel<threshold*1.15)calNoise=calNoise*.96+lastLevel*.04;calPrevLevel=lastLevel}if(!busy)infer()}
+function updateDiagnostics(){if((!listening&&!calState)||!ctx||!ring)return;const need=Math.round(WIN*ctx.sampleRate/SR),pct=Math.min(100,Math.round(ring.n/need*100)),level=Math.round(lastLevel*10000)/10;if(ring.n<need)status.textContent=(calState?'Calibration':'Listening')+' • filling AI window '+pct+'%';else if(!calState)status.textContent='mic '+level+' • passes '+inferenceCount+' • onset '+lastMaxOnset.toFixed(2)+' • frame '+lastMaxFrame.toFixed(2)+' • calibrated '+Object.keys(calibration).length;else status.textContent='Calibration • mic '+level+' • waiting for '+info(calState.midi).label}
 async function openAudio(){await loadModel();stream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false,channelCount:1}});const AC=window.AudioContext||window.webkitAudioContext;ctx=new AC();if(ctx.state==='suspended')await ctx.resume();ring=new Ring(Math.ceil(ctx.sampleRate*5));lastFrame=-Infinity;inferenceCount=0;lastMaxOnset=0;lastMaxFrame=0;source=ctx.createMediaStreamSource(stream);processor=ctx.createScriptProcessor(2048,1,1);gain=ctx.createGain();gain.gain.value=0;processor.onaudioprocess=audio;source.connect(processor);processor.connect(gain);gain.connect(ctx.destination);diagTimer=setInterval(updateDiagnostics,400);updateDiagnostics()}
 async function closeAudio(){if(diagTimer)clearInterval(diagTimer);diagTimer=null;for(const m of [...active.keys()])release(m);if(processor){processor.onaudioprocess=null;try{processor.disconnect()}catch(e){}}if(source)try{source.disconnect()}catch(e){};if(gain)try{gain.disconnect()}catch(e){};if(stream)stream.getTracks().forEach(t=>t.stop());if(ctx)try{await ctx.close()}catch(e){}stream=ctx=source=processor=gain=ring=null;busy=false}
 async function start(){listen.disabled=true;notice.style.display='none';status.textContent='Preparing AI detector…';try{await openAudio();listening=true;listen.disabled=false;listen.textContent='Stop';listen.classList.add('on')}catch(e){await closeAudio();listen.textContent='Try again';listen.disabled=false;status.textContent='Piano Glow could not start: '+(e.message||e.name);latency.textContent='AI unavailable'}}
