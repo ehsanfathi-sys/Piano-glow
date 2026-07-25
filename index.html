@@ -20,6 +20,7 @@
     button{border:1px solid #ffffff28;background:var(--panel);color:#fff;border-radius:13px;padding:10px 13px;font-weight:800;min-height:44px}
     button:disabled{opacity:.55}
     #listen.on{background:#dc2626}
+    #calibrate{background:#26314f}
     #colour{width:46px;padding:6px}
     #colour i{display:block;width:100%;height:30px;border-radius:8px;background:var(--glow);border:2px solid #fff}
     #settingsButton{width:46px;padding:0;font-size:1.15rem}
@@ -28,16 +29,14 @@
     .swatch{height:34px;padding:0;border-radius:9px;min-height:34px}
     #settings{display:none;position:absolute;right:14px;top:68px;z-index:45;width:min(310px,calc(100vw - 28px));padding:14px;border-radius:18px;background:var(--panel);border:1px solid #ffffff2b;box-shadow:0 14px 40px #0009}
     #settings.open{display:block}
-    .setting{margin-bottom:13px}
-    .setting:last-child{margin-bottom:0}
+    .setting{margin-bottom:13px}.setting:last-child{margin-bottom:0}
     .setting-row{display:flex;justify-content:space-between;gap:14px;margin-bottom:5px;font-size:.8rem;font-weight:750}
     .setting small{display:block;color:var(--muted);font-size:.68rem;line-height:1.3;margin-top:3px}
     input[type=range]{width:100%;accent-color:var(--glow)}
     #visual{position:relative;overflow:hidden;background:radial-gradient(circle at 20% 10%,#60a5fa26,transparent 36%),linear-gradient(#0b1020,#090b14)}
     .pill{position:absolute;top:14px;z-index:10;padding:8px 12px;border-radius:999px;background:#0009;border:1px solid #ffffff29;color:#d4daf0;font-size:.78rem;backdrop-filter:blur(8px)}
     #status{left:50%;transform:translateX(-50%);white-space:nowrap;max-width:68%;overflow:hidden;text-overflow:ellipsis}
-    #readout{left:14px;font-weight:850}
-    #latency{right:14px;color:#aeb8d0}
+    #readout{left:14px;font-weight:850}#latency{right:14px;color:#aeb8d0}
     .bar{position:absolute;bottom:-10px;min-height:54px;border-radius:9px 9px 3px 3px;background:var(--glow);display:grid;place-items:start center;padding-top:10px;font-weight:900;text-shadow:0 1px 3px #000;box-shadow:0 0 22px var(--glow);animation:rise 4.2s linear forwards;overflow:hidden;will-change:transform,height,opacity;transition:height .08s linear}
     .bar .label{position:sticky;top:8px;pointer-events:none}
     @keyframes rise{0%{transform:translateY(0);opacity:1}82%{opacity:1}100%{transform:translateY(-78vh);opacity:0}}
@@ -45,52 +44,52 @@
     #keyboard{height:100%;min-width:var(--keyboard-width);position:relative;display:flex;user-select:none}
     .white{position:relative;flex:1;height:100%;background:linear-gradient(#fff,#e8e8ef);border-right:1px solid #999;color:#171923;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;font-weight:800;font-size:.72rem;transition:background .05s}
     .black{position:absolute;top:0;height:62%;width:1.25%;transform:translateX(-50%);z-index:5;background:linear-gradient(#272a36,#030407);border-radius:0 0 5px 5px;color:#fff;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;font-size:.5rem;font-weight:800;transition:background .05s}
-    .active{background:var(--glow)!important;box-shadow:0 0 25px var(--glow)}
+    .active,.cal-target{background:var(--glow)!important;box-shadow:0 0 25px var(--glow)}
+    .cal-target{animation:pulse .8s ease-in-out infinite alternate}
+    @keyframes pulse{to{filter:brightness(1.8)}}
     #startupNotice{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:#d8def2;pointer-events:none}
     #startupNotice div{max-width:560px;padding:18px 22px;border-radius:18px;background:#0005;border:1px solid #ffffff20}
     #startupNotice strong{display:block;margin-bottom:7px}
-    @media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:max(var(--keyboard-width),1500px)}#latency{display:none}header p{display:none}.controls{gap:6px}button{padding:9px 11px}}
+    #calibration{display:none;position:absolute;inset:0;z-index:80;background:#050711e8;backdrop-filter:blur(10px);align-items:center;justify-content:center;padding:22px}
+    #calibration.open{display:flex}
+    .cal-card{width:min(560px,100%);text-align:center;background:var(--panel);border:1px solid #ffffff2b;border-radius:22px;padding:24px;box-shadow:0 20px 70px #000b}
+    .cal-card h2{font-size:2.1rem;margin:0 0 10px}.cal-card p{color:#cbd4ea;line-height:1.45}.cal-progress{font-weight:900;margin:18px 0}
+    .cal-actions{display:flex;justify-content:center;gap:9px;flex-wrap:wrap}.danger{background:#7f1d1d}
+    @media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:max(var(--keyboard-width),1500px)}#latency{display:none}header p{display:none}.controls{gap:6px}button{padding:9px 10px}#calibrate{font-size:.75rem}}
   </style>
 </head>
 <body>
   <div id="app">
     <header>
-      <div>
-        <h1>Piano Glow</h1>
-        <p>Neural 88-key onset-and-frame detection</p>
-      </div>
+      <div><h1>Piano Glow</h1><p>Neural detection with piano-specific calibration</p></div>
       <div class="controls">
         <button id="listen">Start listening</button>
+        <button id="calibrate">Calibrate piano</button>
         <button id="colour" aria-label="Choose colour"><i></i></button>
         <button id="settingsButton" aria-label="Detection settings">⚙︎</button>
       </div>
     </header>
     <div id="palette" aria-label="Colour palette"></div>
     <aside id="settings" aria-label="Detection settings">
-      <div class="setting">
-        <div class="setting-row"><label for="confidence">AI confidence</label><output id="confidenceValue">50%</output></div>
-        <input id="confidence" type="range" min="35" max="85" value="50" step="1">
-        <small>Higher rejects more doubtful notes. Keep this high if false notes matter more than missed notes.</small>
-      </div>
-      <div class="setting">
-        <div class="setting-row"><label for="frameConfidence">Sustain confidence</label><output id="frameConfidenceValue">12%</output></div>
-        <input id="frameConfidence" type="range" min="6" max="40" value="12" step="1">
-        <small>How strongly the model must believe a key remains down.</small>
-      </div>
-      <div class="setting">
-        <div class="setting-row"><label for="keySize">Key width</label><output id="keySizeValue">1400 px</output></div>
-        <input id="keySize" type="range" min="900" max="2400" value="1400" step="50">
-      </div>
+      <div class="setting"><div class="setting-row"><label for="confidence">AI confidence</label><output id="confidenceValue">58%</output></div><input id="confidence" type="range" min="35" max="85" value="58" step="1"><small>Higher rejects more doubtful notes.</small></div>
+      <div class="setting"><div class="setting-row"><label for="frameConfidence">Sustain confidence</label><output id="frameConfidenceValue">16%</output></div><input id="frameConfidence" type="range" min="6" max="40" value="16" step="1"><small>How strongly the model must believe a key remains down.</small></div>
+      <div class="setting"><div class="setting-row"><label for="keySize">Key width</label><output id="keySizeValue">1400 px</output></div><input id="keySize" type="range" min="900" max="2400" value="1400" step="50"></div>
     </aside>
     <section id="visual">
-      <div id="readout" class="pill">Note: —</div>
-      <div id="status" class="pill">Tap Start listening</div>
-      <div id="latency" class="pill">AI model idle</div>
-      <div id="startupNotice"><div><strong>AI piano recognition</strong>The first start downloads and warms a small neural model. Notes are confirmed by an onset followed by nearby active-key evidence.</div></div>
+      <div id="readout" class="pill">Note: —</div><div id="status" class="pill">Tap Start listening</div><div id="latency" class="pill">AI model idle</div>
+      <div id="startupNotice"><div><strong>AI piano recognition</strong>Use Calibrate piano to record three examples of each key. The saved piano fingerprint is used as a second opinion, not as a replacement for the neural model.</div></div>
     </section>
     <section id="keyboardWrap"><div id="keyboard"></div></section>
   </div>
+  <section id="calibration" aria-modal="true" role="dialog">
+    <div class="cal-card">
+      <h2 id="calTitle">Play A0</h2>
+      <p id="calDetail">Strike the highlighted key clearly, then let it fade. Example 1 of 3.</p>
+      <div id="calProgress" class="cal-progress">0 of 88 keys saved</div>
+      <div class="cal-actions"><button id="calSkip">Skip key</button><button id="calCancel">Save and finish later</button><button id="calReset" class="danger">Reset calibration</button></div>
+    </div>
+  </section>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-  <script src="app.js?v=4" defer></script>
+  <script src="app.js?v=5" defer></script>
 </body>
 </html>
