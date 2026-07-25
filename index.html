@@ -35,7 +35,7 @@
     input[type=range]{width:100%;accent-color:var(--glow)}
     #visual{position:relative;overflow:hidden;background:radial-gradient(circle at 20% 10%,#60a5fa26,transparent 36%),linear-gradient(#0b1020,#090b14)}
     .pill{position:absolute;top:14px;z-index:10;padding:8px 12px;border-radius:999px;background:#0009;border:1px solid #ffffff29;color:#d4daf0;font-size:.78rem;backdrop-filter:blur(8px)}
-    #status{left:50%;transform:translateX(-50%);white-space:nowrap;max-width:62%;overflow:hidden;text-overflow:ellipsis}
+    #status{left:50%;transform:translateX(-50%);white-space:nowrap;max-width:68%;overflow:hidden;text-overflow:ellipsis}
     #readout{left:14px;font-weight:850}
     #latency{right:14px;color:#aeb8d0}
     .bar{position:absolute;bottom:-10px;min-height:54px;border-radius:9px 9px 3px 3px;background:var(--glow);display:grid;place-items:start center;padding-top:10px;font-weight:900;text-shadow:0 1px 3px #000;box-shadow:0 0 22px var(--glow);animation:rise 4.2s linear forwards;overflow:hidden;will-change:transform,height,opacity;transition:height .08s linear}
@@ -73,8 +73,8 @@
         <small>Higher rejects more doubtful notes. Keep this high if false notes matter more than missed notes.</small>
       </div>
       <div class="setting">
-        <div class="setting-row"><label for="frameConfidence">Sustain confidence</label><output id="frameConfidenceValue">22%</output></div>
-        <input id="frameConfidence" type="range" min="12" max="50" value="22" step="1">
+        <div class="setting-row"><label for="frameConfidence">Sustain confidence</label><output id="frameConfidenceValue">12%</output></div>
+        <input id="frameConfidence" type="range" min="6" max="40" value="12" step="1">
         <small>How strongly the model must believe a key remains down.</small>
       </div>
       <div class="setting">
@@ -86,11 +86,11 @@
       <div id="readout" class="pill">Note: —</div>
       <div id="status" class="pill">Tap Start listening</div>
       <div id="latency" class="pill">AI model idle</div>
-      <div id="startupNotice"><div><strong>AI piano recognition</strong>The first start downloads and warms a small neural model. After that, notes are confirmed by both an onset detector and an active-key detector.</div></div>
+      <div id="startupNotice"><div><strong>AI piano recognition</strong>The first start downloads and warms a small neural model. Notes are confirmed by an onset followed by nearby active-key evidence.</div></div>
     </section>
     <section id="keyboardWrap"><div id="keyboard"></div></section>
   </div>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-  <script src="app.js?v=3" defer></script>
+  <script src="app.js?v=4" defer></script>
 </body>
 </html>
