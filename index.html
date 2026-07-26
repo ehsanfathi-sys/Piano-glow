@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#000000">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-status-bar-style" content="black">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Piano Glow</title>
   <style>
     :root{--glow:#60a5fa;--keyboard-width:1400px;--panel:#171b2d;--muted:#aeb8d0}
@@ -17,14 +18,14 @@
     header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #ffffff25;background:#000!important;z-index:20}
     h1{margin:0;font-size:1.2rem;line-height:1.1}
     header p{margin:4px 0 0;color:var(--muted);font-size:.78rem}
-    .controls{display:flex;gap:8px;align-items:center}
+    .controls{display:flex;gap:8px;align-items:center;min-width:min(440px,58vw)}
     button{border:1px solid #ffffff28;background:var(--panel);color:#fff;border-radius:13px;padding:10px 13px;font-weight:800;min-height:44px}
     button:disabled{opacity:.55}
-    #listen{min-width:190px;padding-left:24px;padding-right:24px;font-size:1rem}
+    #listen{flex:1;min-width:0;padding-left:24px;padding-right:24px;font-size:1rem}
     #listen.on{background:#dc2626}
-    #colour{width:46px;padding:6px}
+    #colour{flex:0 0 46px;width:46px;padding:6px}
     #colour i{display:block;width:100%;height:30px;border-radius:8px;background:var(--glow);border:2px solid #fff}
-    #settingsButton{width:46px;padding:0;font-size:1.15rem}
+    #settingsButton{flex:0 0 46px;width:46px;padding:0;font-size:1.15rem}
     #palette{display:none;position:absolute;right:62px;top:68px;z-index:40;width:220px;padding:12px;border-radius:18px;background:var(--panel);border:1px solid #ffffff2b;grid-template-columns:repeat(5,1fr);gap:9px;box-shadow:0 14px 40px #0008}
     #palette.open{display:grid}
     .swatch{height:34px;padding:0;border-radius:9px;min-height:34px}
@@ -64,7 +65,7 @@
     #calDetail{color:#d4daf0;line-height:1.45;min-height:3em}
     #calProgress{margin:14px 0;color:#aeb8d0;font-weight:750}
     #calActions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
-    @media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:max(var(--keyboard-width),1500px)}#latency{display:none}header p{display:none}.controls{gap:6px}button{padding:9px 11px}#listen{min-width:150px;padding-left:18px;padding-right:18px}}
+    @media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:max(var(--keyboard-width),1500px)}#latency{display:none}header p{display:none}.controls{gap:6px;min-width:min(330px,62vw)}button{padding:9px 11px}#listen{padding-left:18px;padding-right:18px}}
     @media(prefers-reduced-motion:reduce){.smoke{display:none}.bar.released{animation-duration:5.5s}}
   </style>
 </head>
@@ -104,6 +105,6 @@
   <script src="overlap-offset.js?v=1" defer></script>
   <script src="dense-passage.js?v=2" defer></script>
   <script src="particle-enhancer.js?v=18" defer></script>
-  <script src="app.js?v=19" defer></script>
+  <script src="app.js?v=20" defer></script>
 </body>
 </html>
