@@ -20,6 +20,8 @@
     .controls{display:flex;gap:8px;align-items:center}
     button{border:1px solid #ffffff28;background:var(--panel);color:#fff;border-radius:13px;padding:10px 13px;font-weight:800;min-height:44px}
     button:disabled{opacity:.55}
+    #calibrate{display:none!important}
+    #listen{min-width:190px;padding-left:24px;padding-right:24px;font-size:1rem}
     #listen.on{background:#dc2626}
     #colour{width:46px;padding:6px}
     #colour i{display:block;width:100%;height:30px;border-radius:8px;background:var(--glow);border:2px solid #fff}
@@ -63,7 +65,7 @@
     #calDetail{color:#d4daf0;line-height:1.45;min-height:3em}
     #calProgress{margin:14px 0;color:#aeb8d0;font-weight:750}
     #calActions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
-    @media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:max(var(--keyboard-width),1500px)}#latency{display:none}header p{display:none}.controls{gap:6px}button{padding:9px 11px}}
+    @media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:max(var(--keyboard-width),1500px)}#latency{display:none}header p{display:none}.controls{gap:6px}button{padding:9px 11px}#listen{min-width:150px;padding-left:18px;padding-right:18px}}
     @media(prefers-reduced-motion:reduce){.smoke{display:none}.bar.released{animation-duration:5.5s}}
   </style>
 </head>
@@ -72,7 +74,7 @@
     <header>
       <div><h1>Piano Glow</h1><p>Neural 88-key onset-and-frame detection</p></div>
       <div class="controls">
-        <button id="calibrate">Calibrate piano</button>
+        <button id="calibrate" aria-hidden="true" tabindex="-1">Calibrate piano</button>
         <button id="listen">Start listening</button>
         <button id="colour" aria-label="Choose colour"><i></i></button>
         <button id="settingsButton" aria-label="Detection settings">⚙︎</button>
@@ -86,7 +88,7 @@
     </aside>
     <section id="visual">
       <div id="readout" class="pill">Note: —</div><div id="status" class="pill">Tap Start listening</div><div id="latency" class="pill">AI model idle</div>
-      <div id="startupNotice"><div><strong>AI piano recognition</strong>Calibrate your piano key by key, or start listening immediately.</div></div>
+      <div id="startupNotice"><div><strong>AI piano recognition</strong>Tap Start listening and play your piano.</div></div>
     </section>
     <section id="keyboardWrap"><div id="keyboard"></div></section>
   </div>
