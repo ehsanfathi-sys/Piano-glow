@@ -10,7 +10,6 @@ const NORMAL_MIN_HEIGHT=24;
 const GROWTH_PER_SECOND=105;
 const SHORT_NOTE_WINDOW=.2;
 const RELEASE_GRACE_MS=110;
-const RELEASE_REMOVE_DELAY=4400;
 const MAX_VISIBLE_BARS=72;
 const SHORT_NOTE_GROWTH=(NORMAL_MIN_HEIGHT+SHORT_NOTE_WINDOW*GROWTH_PER_SECOND-MIN_HEIGHT)/SHORT_NOTE_WINDOW;
 
@@ -59,8 +58,8 @@ function releaseBar(bar,state){
   bar.style.height=height+'px';
   bar.style.minHeight=height+'px';
   bar.classList.add('released');
-  bar.style.animation='rise 4.2s linear forwards';
-  state.removeTimer=setTimeout(()=>removeBar(bar),RELEASE_REMOVE_DELAY);
+  bar.style.animation='rise var(--rise-duration, 4s) linear forwards';
+  bar.addEventListener('animationend',()=>removeBar(bar),{once:true});
 }
 
 function trimVisualLoad(){
@@ -71,7 +70,6 @@ function trimVisualLoad(){
     if(excess<=0)break;
     const state=tracked.get(bar);
     if(!bar.classList.contains('released')&&state?.phase!=='released')continue;
-    if(state?.removeTimer)clearTimeout(state.removeTimer);
     removeBar(bar);
     excess--;
   }
@@ -91,8 +89,7 @@ function track(bar){
     midi:bar.dataset.midi,
     startedAt:now,
     missingSince:0,
-    phase:'growing',
-    removeTimer:0
+    phase:'growing'
   });
   trimVisualLoad();
 }
@@ -101,7 +98,6 @@ function frame(now){
   const maxHeight=Math.max(NORMAL_MIN_HEIGHT,visual.clientHeight*.72);
   for(const[bar,state]of tracked){
     if(!bar.isConnected){
-      if(state.removeTimer)clearTimeout(state.removeTimer);
       tracked.delete(bar);
       continue;
     }
@@ -136,4 +132,4 @@ const observer=new MutationObserver(records=>{
 observer.observe(visual,{childList:true,subtree:true});
 visual.querySelectorAll('.bar').forEach(track);
 requestAnimationFrame(frame);
-})();
+}());
