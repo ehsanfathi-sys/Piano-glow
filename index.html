@@ -20,7 +20,6 @@
     .controls{display:flex;gap:8px;align-items:center}
     button{border:1px solid #ffffff28;background:var(--panel);color:#fff;border-radius:13px;padding:10px 13px;font-weight:800;min-height:44px}
     button:disabled{opacity:.55}
-    #calibrate{display:none!important}
     #listen{min-width:190px;padding-left:24px;padding-right:24px;font-size:1rem}
     #listen.on{background:#dc2626}
     #colour{width:46px;padding:6px}
@@ -74,12 +73,12 @@
     <header>
       <div><h1>Piano Glow</h1><p>Neural 88-key onset-and-frame detection</p></div>
       <div class="controls">
-        <button id="calibrate" aria-hidden="true" tabindex="-1">Calibrate piano</button>
         <button id="listen">Start listening</button>
         <button id="colour" aria-label="Choose colour"><i></i></button>
         <button id="settingsButton" aria-label="Detection settings">⚙︎</button>
       </div>
     </header>
+    <button id="calibrate" hidden aria-hidden="true" tabindex="-1" style="display:none!important"></button>
     <div id="palette" aria-label="Colour palette"></div>
     <aside id="settings" aria-label="Detection settings">
       <div class="setting"><div class="setting-row"><label for="confidence">AI confidence</label><output id="confidenceValue">58%</output></div><input id="confidence" type="range" min="35" max="85" value="58" step="1"><small>Higher rejects more doubtful notes.</small></div>
