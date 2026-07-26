@@ -9,7 +9,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <title>Piano Glow</title>
   <style>
-    :root{--glow:#60a5fa;--keyboard-width:1400px;--panel:#171b2d;--muted:#aeb8d0}
+    :root{--glow:#60a5fa;--keyboard-width:1400px;--panel:#171b2d;--muted:#aeb8d0;--rise-duration:4s}
     *{box-sizing:border-box}
     html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#000!important;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
     body{position:fixed;inset:0;background-color:#000!important;background-image:none!important}
@@ -18,9 +18,13 @@
     header{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:12px 14px;border-bottom:1px solid #ffffff25;background:#000!important;z-index:20}
     h1{margin:0;font-size:1.2rem;line-height:1.1}
     header p{margin:4px 0 0;color:var(--muted);font-size:.78rem}
-    .controls{display:flex;gap:8px;align-items:center;min-width:min(440px,58vw)}
+    .controls{display:flex;gap:8px;align-items:center;min-width:min(620px,72vw)}
     button{border:1px solid #ffffff28;background:var(--panel);color:#fff;border-radius:13px;padding:10px 13px;font-weight:800;min-height:44px}
     button:disabled{opacity:.55}
+    .speed-control{display:grid;grid-template-columns:auto minmax(90px,150px) 30px;align-items:center;gap:7px;min-height:44px;padding:6px 10px;border:1px solid #ffffff28;border-radius:13px;background:var(--panel);white-space:nowrap}
+    .speed-control label{font-size:.72rem;font-weight:850;color:#eef2ff}
+    .speed-control input{width:100%;min-width:90px;accent-color:var(--glow)}
+    .speed-control output{font-size:.75rem;font-weight:900;text-align:right;color:#fff}
     #listen{flex:1;min-width:0;padding-left:24px;padding-right:24px;font-size:1rem}
     #listen.on{background:#dc2626}
     #colour{flex:0 0 46px;width:46px;padding:6px}
@@ -43,7 +47,7 @@
     #latency{right:14px;color:#aeb8d0}
     .bar{position:absolute;bottom:-10px;min-height:24px;border:3px solid #000;border-radius:9px 9px 3px 3px;background:var(--glow);background-clip:padding-box;display:block;padding:0;color:transparent!important;font-size:0!important;line-height:0!important;text-shadow:none!important;box-shadow:0 0 22px var(--glow);animation:none;overflow:hidden;will-change:height,transform,opacity;z-index:2}
     .bar *,.bar .label{display:none!important;visibility:hidden!important;color:transparent!important;font-size:0!important;text-shadow:none!important}
-    .bar.released{animation:rise 4.2s linear forwards}
+    .bar.released{animation:rise var(--rise-duration) linear forwards}
     #visual.dense-passage .bar{box-shadow:0 0 7px var(--glow)}
     #visual.dense-passage .smoke{opacity:.24;filter:none;box-shadow:0 0 5px var(--glow)}
     .smoke{position:absolute;display:block;border-radius:50%;pointer-events:none;z-index:3;background:radial-gradient(circle,#fff 0 15%,var(--glow) 34%,transparent 78%);filter:blur(1.25px);opacity:.72;box-shadow:0 0 15px var(--glow),0 0 5px #fff8;animation:smoke-drift 1.5s ease-out forwards;will-change:transform,opacity}
@@ -65,8 +69,9 @@
     #calDetail{color:#d4daf0;line-height:1.45;min-height:3em}
     #calProgress{margin:14px 0;color:#aeb8d0;font-weight:750}
     #calActions{display:flex;gap:9px;justify-content:center;flex-wrap:wrap}
-    @media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:max(var(--keyboard-width),1500px)}#latency{display:none}header p{display:none}.controls{gap:6px;min-width:min(330px,62vw)}button{padding:9px 11px}#listen{padding-left:18px;padding-right:18px}}
-    @media(prefers-reduced-motion:reduce){.smoke{display:none}.bar.released{animation-duration:5.5s}}
+    @media(max-width:760px){header{gap:8px;padding:9px 10px}header>div:first-child{display:none}.controls{width:100%;min-width:0}.speed-control{grid-template-columns:auto minmax(64px,1fr) 24px;flex:1;padding:5px 8px}.speed-control input{min-width:64px}#listen{flex:1.15;padding-left:12px;padding-right:12px}#colour,#settingsButton{flex-basis:42px;width:42px}}
+    @media(orientation:portrait){#app{grid-template-rows:auto 1fr 24vh}#keyboard{min-width:max(var(--keyboard-width),1500px)}#latency{display:none}header p{display:none}.controls{gap:6px}button{padding:9px 9px}#listen{padding-left:10px;padding-right:10px}}
+    @media(prefers-reduced-motion:reduce){.smoke{display:none}}
   </style>
 </head>
 <body>
@@ -74,6 +79,11 @@
     <header>
       <div><h1>Piano Glow</h1><p>Neural 88-key onset-and-frame detection</p></div>
       <div class="controls">
+        <div class="speed-control" aria-label="Released bar speed">
+          <label for="riseSpeed">Speed</label>
+          <input id="riseSpeed" type="range" min="1" max="100" value="50" step="1">
+          <output id="riseSpeedValue" for="riseSpeed">50</output>
+        </div>
         <button id="listen">Start listening</button>
         <button id="colour" aria-label="Choose colour"><i></i></button>
         <button id="settingsButton" aria-label="Detection settings">⚙︎</button>
@@ -101,7 +111,8 @@
     </div>
   </section>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-  <script src="duration-bars.js?v=23" defer></script>
+  <script src="rise-speed.js?v=1" defer></script>
+  <script src="duration-bars.js?v=24" defer></script>
   <script src="overlap-offset.js?v=1" defer></script>
   <script src="dense-passage.js?v=2" defer></script>
   <script src="particle-enhancer.js?v=18" defer></script>
