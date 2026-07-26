@@ -17,7 +17,8 @@ const SHORT_NOTE_GROWTH=(NORMAL_MIN_HEIGHT+SHORT_NOTE_WINDOW*GROWTH_PER_SECOND-M
 let latestBarStartedAt=-Infinity;
 function keyIsActive(midi){const key=keyboard.querySelector('[data-midi="'+midi+'"]');return !!(key&&key.classList.contains('active'))}
 function anotherKeyIsActive(midi){for(const key of keyboard.querySelectorAll('.active[data-midi]'))if(key.dataset.midi!==String(midi))return true;return false}
-function track(bar){if(!bar||tracked.has(bar))return;const now=performance.now(),midi=bar.dataset.midi;latestBarStartedAt=now;bar.style.animation='none';bar.style.height=MIN_HEIGHT+'px';bar.style.minHeight=MIN_HEIGHT+'px';bar.dataset.durationStart=now;tracked.set(bar,{midi,start:now,released:false,inactiveSince:0,polyphonyGuard:false,guardStarted:0})}
+function addSeparationBorder(bar){bar.style.border='3px solid #000';bar.style.backgroundClip='padding-box'}
+function track(bar){if(!bar||tracked.has(bar))return;const now=performance.now(),midi=bar.dataset.midi;latestBarStartedAt=now;addSeparationBorder(bar);bar.style.animation='none';bar.style.height=MIN_HEIGHT+'px';bar.style.minHeight=MIN_HEIGHT+'px';bar.dataset.durationStart=now;tracked.set(bar,{midi,start:now,released:false,inactiveSince:0,polyphonyGuard:false,guardStarted:0})}
 function releaseBar(bar,state){if(state.released)return;state.released=true;const height=Math.min(Math.max(NORMAL_MIN_HEIGHT,visual.clientHeight*.72),(parseFloat(bar.style.height)||MIN_HEIGHT)+RELEASE_PADDING);bar.style.height=height+'px';bar.style.minHeight=height+'px';bar.classList.add('released');bar.style.animation='rise 4.2s linear forwards'}
 function durationHeight(seconds){if(seconds<SHORT_NOTE_WINDOW)return MIN_HEIGHT+seconds*SHORT_NOTE_GROWTH;return NORMAL_MIN_HEIGHT+seconds*GROWTH_PER_SECOND}
 function grow(bar,state,now,maxHeight){const seconds=Math.max(0,(now-state.start)/1000),height=Math.min(maxHeight,durationHeight(seconds));bar.style.height=height+'px';bar.style.minHeight=height+'px'}
