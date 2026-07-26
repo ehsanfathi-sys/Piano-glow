@@ -5,7 +5,7 @@ const keyboard=document.getElementById('keyboard');
 if(!visual||!keyboard)return;
 
 const tracked=new Map();
-const MIN_HEIGHT=12;
+const MIN_HEIGHT=24;
 const NORMAL_MIN_HEIGHT=24;
 const GROWTH_PER_SECOND=105;
 const SHORT_NOTE_WINDOW=.2;
@@ -82,6 +82,9 @@ function track(bar){
   const now=performance.now();
   addSeparationBorder(bar);
   bar.style.animation='none';
+  bar.style.bottom='0';
+  bar.style.opacity='1';
+  bar.style.transform='translateY(0)';
   bar.style.height=MIN_HEIGHT+'px';
   bar.style.minHeight=MIN_HEIGHT+'px';
   bar.dataset.durationStart=String(now);
