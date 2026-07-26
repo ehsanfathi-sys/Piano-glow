@@ -19,6 +19,17 @@ function keyIsActive(midi){
   return !!(key&&key.classList.contains('active'));
 }
 
+function stripBarText(bar){
+  if(!bar||!bar.classList.contains('bar'))return;
+  if(bar.childNodes.length)bar.replaceChildren();
+  bar.textContent='';
+  bar.removeAttribute('title');
+  bar.removeAttribute('aria-label');
+  bar.style.color='transparent';
+  bar.style.textShadow='none';
+  bar.style.fontSize='0';
+}
+
 function addSeparationBorder(bar){
   bar.style.border='3px solid #000';
   bar.style.backgroundClip='padding-box';
@@ -67,7 +78,9 @@ function trimVisualLoad(){
 }
 
 function track(bar){
-  if(!bar||tracked.has(bar))return;
+  if(!bar)return;
+  stripBarText(bar);
+  if(tracked.has(bar))return;
   const now=performance.now();
   addSeparationBorder(bar);
   bar.style.animation='none';
@@ -92,6 +105,7 @@ function frame(now){
       tracked.delete(bar);
       continue;
     }
+    stripBarText(bar);
     if(state.phase!=='growing')continue;
 
     if(keyIsActive(state.midi)){
@@ -111,6 +125,8 @@ const observer=new MutationObserver(records=>{
   for(const record of records){
     for(const node of record.addedNodes){
       if(!(node instanceof Element))continue;
+      const parentBar=node.closest('.bar');
+      if(parentBar)stripBarText(parentBar);
       if(node.classList.contains('bar'))track(node);
       node.querySelectorAll&&node.querySelectorAll('.bar').forEach(track);
     }
