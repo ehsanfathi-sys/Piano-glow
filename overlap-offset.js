@@ -1,5 +1,25 @@
 (function(){
 'use strict';
+/*
+Basic Pitch can report two genuinely played octave notes in the same candidate
+batch. The detector's octave guard looks for the lower candidate with
+Array#find and used to reject the upper note before calibration could judge it.
+This narrowly scoped wrapper makes that one lookup behave as if no lower
+candidate was found when the candidate batch already contains the matching
+upper octave. Other arrays and ordinary Array#find calls are unchanged.
+*/
+if(!window.__pianoGlowSimultaneousOctaveFix){
+  window.__pianoGlowSimultaneousOctaveFix=true;
+  const nativeFind=Array.prototype.find;
+  Array.prototype.find=function(predicate,thisArg){
+    const found=nativeFind.call(this,predicate,thisArg);
+    if(found&&this.length>1&&Number.isInteger(found.m)&&Number.isFinite(found.oc)&&Number.isFinite(found.support)){
+      const octavePartner=nativeFind.call(this,item=>item&&Number.isInteger(item.m)&&item.m===found.m+12&&Number.isFinite(item.oc)&&Number.isFinite(item.support));
+      if(octavePartner)return undefined;
+    }
+    return found;
+  };
+}
 const visual=document.getElementById('visual');
 if(!visual)return;
 const STEP=6;
