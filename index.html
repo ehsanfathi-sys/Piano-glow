@@ -48,8 +48,6 @@
     .bar{position:absolute;bottom:-10px;min-height:24px;border:3px solid #000;border-radius:9px 9px 3px 3px;background:var(--glow);background-clip:padding-box;display:block;padding:0;color:transparent!important;font-size:0!important;line-height:0!important;text-shadow:none!important;box-shadow:0 0 22px var(--glow);animation:none;overflow:hidden;will-change:height,transform,opacity;z-index:2}
     .bar *,.bar .label{display:none!important;visibility:hidden!important;color:transparent!important;font-size:0!important;text-shadow:none!important}
     .bar.released{animation:rise var(--rise-duration) linear forwards}
-    #visual.dense-passage .bar{box-shadow:0 0 7px var(--glow)}
-    #visual.dense-passage .smoke{opacity:.24;filter:none;box-shadow:0 0 5px var(--glow)}
     .smoke{position:absolute;display:block;border-radius:50%;pointer-events:none;z-index:3;background:radial-gradient(circle,#fff 0 15%,var(--glow) 34%,transparent 78%);filter:blur(1.25px);opacity:.72;box-shadow:0 0 15px var(--glow),0 0 5px #fff8;animation:smoke-drift 1.5s ease-out forwards;will-change:transform,opacity}
     @keyframes rise{0%{transform:translateY(0);opacity:1}82%{opacity:1}100%{transform:translateY(-78vh);opacity:0}}
     @keyframes smoke-drift{0%{transform:translate3d(0,0,0) scale(.78);opacity:.7}45%{opacity:.48}100%{transform:translate3d(calc(1.18 * var(--drift)),calc(-1.16 * var(--smoke-rise)),0) scale(1.95);opacity:0}}
@@ -111,14 +109,8 @@
     </div>
   </section>
   <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.22.0/dist/tf.min.js"></script>
-  <script src="dual-hand-balance.js?v=1" defer></script>
-  <script src="rise-speed.js?v=2" defer></script>
-  <script src="duration-bars.js?v=24" defer></script>
-  <script src="overlap-offset.js?v=1" defer></script>
-  <script src="dense-passage.js?v=2" defer></script>
-  <script src="particle-enhancer.js?v=18" defer></script>
-  <script src="audio-gate.js?v=1" defer></script>
-  <script src="app.js?v=22" defer></script>
-  <script src="piano-magic.js?v=1" defer></script>
+  <script src="rise-speed.js?v=3" defer></script>
+  <script src="duration-bars.js?v=25" defer></script>
+  <script src="app.js?v=23" defer></script>
 </body>
 </html>
