@@ -59,9 +59,6 @@
     .black{position:absolute;top:0;height:62%;width:1.25%;transform:translateX(-50%);z-index:5;background:linear-gradient(#272a36,#030407);border-radius:0 0 5px 5px;color:#fff;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px;font-size:.5rem;font-weight:800;transition:background .05s}
     .active{background:var(--glow)!important;box-shadow:0 0 25px var(--glow)}
     .cal-target{outline:4px solid #facc15;outline-offset:-4px;box-shadow:0 0 28px #facc15!important}
-    #startupNotice{position:absolute;inset:0;display:grid;place-items:center;padding:24px;text-align:center;color:#d8def2;pointer-events:none;background:transparent!important}
-    #startupNotice div{max-width:560px;padding:18px 22px;border-radius:18px;background:#0005;border:1px solid #ffffff20}
-    #startupNotice strong{display:block;margin-bottom:7px}
     #calibration{display:none;position:absolute;inset:0;z-index:60;background:#000!important;backdrop-filter:none;padding:18px;place-items:center}
     #calibration.open{display:grid}
     #calCard{width:min(560px,100%);background:#000;border:1px solid #ffffff2b;border-radius:22px;padding:22px;text-align:center;box-shadow:0 18px 55px #000b}
@@ -98,7 +95,6 @@
     </aside>
     <section id="visual">
       <div id="readout" class="pill">Note: —</div><div id="status" class="pill">Tap Start listening</div><div id="latency" class="pill">AI model idle</div>
-      <div id="startupNotice"><div><strong>AI piano recognition</strong>Tap Start listening and play your piano.</div></div>
     </section>
     <section id="keyboardWrap"><div id="keyboard"></div></section>
   </div>
