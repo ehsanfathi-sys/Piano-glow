@@ -42,7 +42,6 @@
     input[type=range]{width:100%;accent-color:var(--glow)}
     #visual{position:relative;overflow:hidden;background:#000!important;background-color:#000!important;background-image:none!important}
     .pill{position:absolute;top:14px;z-index:10;padding:8px 12px;border-radius:999px;background:#0009;border:1px solid #ffffff29;color:#d4daf0;font-size:.78rem;backdrop-filter:blur(8px)}
-    #status{left:50%;transform:translateX(-50%);white-space:nowrap;max-width:68%;overflow:hidden;text-overflow:ellipsis}
     #readout{left:14px;font-weight:850}
     #latency{right:14px;color:#aeb8d0}
     .bar{position:absolute;bottom:-10px;min-height:24px;border:3px solid #000;border-radius:9px 9px 3px 3px;background:var(--glow);background-clip:padding-box;display:block;padding:0;color:transparent!important;font-size:0!important;line-height:0!important;text-shadow:none!important;box-shadow:0 0 22px var(--glow);animation:none;overflow:hidden;will-change:height,transform,opacity;z-index:2}
@@ -94,8 +93,10 @@
       <div class="setting"><div class="setting-row"><label for="keySize">Key width</label><output id="keySizeValue">1400 px</output></div><input id="keySize" type="range" min="900" max="2400" value="1400" step="50"></div>
     </aside>
     <section id="visual">
-      <div id="readout" class="pill">Note: —</div><div id="status" class="pill">Tap Start listening</div><div id="latency" class="pill">AI model idle</div>
+      <div id="readout" class="pill">Note: —</div><div id="latency" class="pill">AI model idle</div>
     </section>
+    <template id="status"></template>
+    <template id="startupNotice"></template>
     <section id="keyboardWrap"><div id="keyboard"></div></section>
   </div>
   <section id="calibration">
