@@ -39,9 +39,9 @@ function durationHeight(seconds){
   return NORMAL_MIN_HEIGHT+seconds*GROWTH_PER_SECOND;
 }
 
-function grow(bar,state,now,maxHeight){
+function grow(bar,state,now){
   const seconds=Math.max(0,(now-state.startedAt)/1000);
-  const height=Math.min(maxHeight,durationHeight(seconds));
+  const height=durationHeight(seconds);
   bar.style.height=height+'px';
   bar.style.minHeight=height+'px';
 }
@@ -98,7 +98,6 @@ function track(bar){
 }
 
 function frame(now){
-  const maxHeight=Math.max(NORMAL_MIN_HEIGHT,visual.clientHeight*.72);
   for(const[bar,state]of tracked){
     if(!bar.isConnected){
       tracked.delete(bar);
@@ -109,7 +108,7 @@ function frame(now){
 
     if(keyIsActive(state.midi)){
       state.missingSince=0;
-      grow(bar,state,now,maxHeight);
+      grow(bar,state,now);
       continue;
     }
 
