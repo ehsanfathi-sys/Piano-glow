@@ -1,5 +1,21 @@
 (function(){
 'use strict';
+try{
+  const key='pianoGlowAiSettingsV4';
+  const reset='pianoGlowSafeThresholdsV1';
+  if(!localStorage.getItem(reset)){
+    let previous={};
+    try{previous=JSON.parse(localStorage.getItem(key)||'{}')||{}}catch(error){}
+    localStorage.setItem(key,JSON.stringify({
+      confidence:78,
+      frameConfidence:24,
+      keySize:Number.isFinite(previous.keySize)?previous.keySize:1400,
+      glow:/^#[0-9a-f]{6}$/i.test(previous.glow||'')?previous.glow:'#60a5fa'
+    }));
+    localStorage.setItem(reset,'1');
+  }
+}catch(error){}
+
 const visual=document.getElementById('visual');
 const keyboard=document.getElementById('keyboard');
 if(!visual||!keyboard)return;
